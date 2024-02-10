@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+group = "nl.helicotech.wired.ktor"
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
