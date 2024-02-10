@@ -44,12 +44,19 @@ abstract class WiredPlugin: Plugin<Project> {
         afterEvaluate {
             tasks.getByName(DownloadVendorDependenciesTask.NAME).dependsOn(tasks.getByName(InitializeDirectoriesTask.NAME))
 
-            tasks.getByName(GenerateTypedAssetsTask.NAME).dependsOn(tasks.getByName(DownloadVendorDependenciesTask.NAME))
+            tasks.getByName(GenerateTypedAssetsTask.NAME) {
+                dependsOn(tasks.getByName(DownloadVendorDependenciesTask.NAME))
+
+                doLast {
+                    (this as GenerateTypedAssetsTask).registerSourceSet()
+                }
+            }
+
             tasks.getByName("processResources").dependsOn(tasks.getByName(DownloadVendorDependenciesTask.NAME))
 
-            tasks.getByName("build").dependsOn(tasks.getByName(GenerateTypedAssetsTask.NAME))
-
-            (tasks.getByName(GenerateTypedAssetsTask.NAME) as GenerateTypedAssetsTask).registerSourceSet()
+            tasks.getByName("compileKotlin") {
+                dependsOn(tasks.getByName(GenerateTypedAssetsTask.NAME))
+            }
         }
     }
 }

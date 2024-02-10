@@ -1,4 +1,4 @@
-group = "nl.helicotech.wired.example"
+group = "nl.helicotech.wired.examples.basic"
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -27,7 +27,7 @@ dependencies {
     implementation(libs.ktor.server.html.builder)
     implementation(libs.logback.classic)
 
-    implementation(project(":wired"))
+    implementation(project(":library:core"))
 
     testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)

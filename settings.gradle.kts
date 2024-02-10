@@ -1,6 +1,6 @@
-rootProject.name = "ktor-wired"
+rootProject.name = "wired"
 
 includeBuild("plugin")
 
-include("wired")
-include("example")
+include("library:core")
+include("examples:basic")
