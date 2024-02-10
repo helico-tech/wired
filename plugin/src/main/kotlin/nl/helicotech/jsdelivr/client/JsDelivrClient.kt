@@ -1,6 +1,5 @@
 package nl.helicotech.jsdelivr.client
 
-import com.google.gson.JsonObject
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*

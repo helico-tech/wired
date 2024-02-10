@@ -2,11 +2,7 @@ allprojects {
     repositories {
         mavenCentral()
     }
-
     version = "0.0.1"
-    group = "nl.helicotech.ktorwired.${project.name}"
-
-    println("Project: ${project.name} - Version: ${project.version} - Group: ${project.group}")
 }
 
 plugins {

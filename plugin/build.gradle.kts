@@ -1,3 +1,5 @@
+group = "nl.helicotech.wired.gradle-plugin"
+
 repositories {
     gradlePluginPortal()
     mavenCentral()
