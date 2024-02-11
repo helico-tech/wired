@@ -1,4 +1,4 @@
-group = "nl.helicotech.wired.ktor"
+group = "nl.helicotech.wired.core"
 
 plugins {
     alias(libs.plugins.kotlin.jvm)

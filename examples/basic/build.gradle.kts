@@ -1,4 +1,4 @@
-group = "nl.helicotech.wired.example"
+group = "nl.helicotech.wired.examples.basic"
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -16,9 +16,7 @@ wired {
 
 application {
     mainClass.set("nl.helicotech.wired.example.ApplicationKt")
-
-    val isDevelopment: Boolean = project.ext.has("development")
-    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
 }
 
 dependencies {
@@ -27,7 +25,7 @@ dependencies {
     implementation(libs.ktor.server.html.builder)
     implementation(libs.logback.classic)
 
-    implementation(project(":wired"))
+    implementation(project(":library:core"))
 
     testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)

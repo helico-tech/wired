@@ -1,4 +1,4 @@
-rootProject.name = "ktor-wired-plugin"
+rootProject.name = "plugin"
 
 dependencyResolutionManagement {
     versionCatalogs {
