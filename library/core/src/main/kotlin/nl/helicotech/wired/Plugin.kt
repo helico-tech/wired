@@ -40,19 +40,16 @@ val AssetsPlugin = createApplicationPlugin("assets", ::AssetsPluginConfiguration
                 return@get
             }
 
-            val uri = application.environment.classLoader.getResource(asset.path.toString())?.toURI()
+            val stream = application.environment.classLoader.getResourceAsStream(asset.path.toString())
+            val contentType = ContentType.defaultForFile(asset.path)
 
-            if (uri == null) {
+            if (stream == null) {
                 call.respond(HttpStatusCode.NotFound)
                 return@get
             }
 
-            val file = File(uri)
-            if (file.exists()) {
-                call.respondFile(file)
-            } else {
-                call.respond(HttpStatusCode.NotFound)
-            }
+            call.respondOutputStream(contentType = contentType) { stream.copyTo(this) }
         }
+
     }
 }
