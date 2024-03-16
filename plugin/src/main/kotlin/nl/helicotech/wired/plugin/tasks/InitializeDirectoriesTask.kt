@@ -28,12 +28,19 @@ abstract class InitializeDirectoriesTask @Inject constructor(
 
     private fun initializeDirectories() {
         initializeDirectory(extension.assetsDirectory.get())
-        initializeDirectory(extension.vendorDirectory.get())
         initializeDirectory(extension.jsDirectory.get())
+        initializeDirectory(extension.cssDirectory.get())
+
+        initializeDirectory(extension.vendorDirectory.get(), keep = false)
     }
 
-    private fun initializeDirectory(directory: File) {
+    private fun initializeDirectory(directory: File, keep: Boolean = true) {
         logger.log(LogLevel.INFO, "Initializing directory: ${directory.absolutePath}")
         directory.mkdirs()
+
+        if (keep) {
+            val gitKeep = File(directory, ".gitkeep")
+            gitKeep.createNewFile()
+        }
     }
 }

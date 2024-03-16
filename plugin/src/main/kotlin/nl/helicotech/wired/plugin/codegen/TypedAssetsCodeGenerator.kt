@@ -7,9 +7,9 @@ import java.io.File
 
 
 class TypedAssetsCodeGenerator(
-    private val packageName: String,
-    private val fileName: String,
-    private val assetFolder: File,
+    val packageName: String,
+    val fileName: String,
+    vararg val assetFolders: File
 ) {
 
     companion object {
@@ -20,8 +20,14 @@ class TypedAssetsCodeGenerator(
     }
 
     init {
-        require(assetFolder.isDirectory) {
-            "Asset folder must be a directory"
+        require(assetFolders.isNotEmpty()) {
+            "At least one asset folder must be provided"
+        }
+
+        assetFolders.forEach { assetFolder ->
+            require(assetFolder.exists()) {
+                "Asset folder must exist"
+            }
         }
     }
 
@@ -34,14 +40,23 @@ class TypedAssetsCodeGenerator(
         .assets()
         .build()
 
-    private fun FileSpec.Builder.assets() = addType(
-        typeSpec = assetFolder(
-            file = assetFolder,
-            name = "Assets"
+    private fun FileSpec.Builder.assets() = apply {
+        addType(
+            TypeSpec.objectBuilder("Assets")
+                .apply {
+                    assetFolders.forEach { assetFolder ->
+                        asset(
+                            root = assetFolder,
+                            file = assetFolder
+                        )
+                    }
+                }
+                .build()
         )
-    )
+    }
 
     private fun assetFolder(
+        root: File,
         file: File,
         name: String? = null,
         registerAsset: (String) -> Unit = {},
@@ -55,7 +70,9 @@ class TypedAssetsCodeGenerator(
         registerAsset(containerName)
 
         file.listFiles()?.forEach { child ->
+            if (child.name.startsWith(".")) return@forEach
             builder.asset(
+                root = root,
                 file = child,
                 registerAsset = { assets.add(it) }
             )
@@ -70,7 +87,7 @@ class TypedAssetsCodeGenerator(
                 .initializer(
                     format = "%T(%S)",
                     File::class,
-                    file.relativeTo(assetFolder.parentFile).path
+                    file.relativeTo(root.parentFile).path
                 )
                 .build()
         )
@@ -92,24 +109,28 @@ class TypedAssetsCodeGenerator(
     }
 
     private fun TypeSpec.Builder.asset(
+        root: File,
         file: File,
         registerAsset: (String) -> Unit = {}
     ): TypeSpec.Builder = when {
-        file.isDirectory -> assetFolder(file, registerAsset)
-        else -> assetFile(file, registerAsset)
+        file.isDirectory -> assetFolder(root, file, registerAsset)
+        else -> assetFile(root, file, registerAsset)
     }
 
     private fun TypeSpec.Builder.assetFolder(
+        root: File,
         file: File,
         registerAsset: (String) -> Unit = {}
     ) = addType(
         this@TypedAssetsCodeGenerator.assetFolder(
+            root = root,
             file = file,
             registerAsset = registerAsset
         )
     )
 
     private fun TypeSpec.Builder.assetFile(
+        root: File,
         file: File,
         registerAsset: (String) -> Unit = {}
     ): TypeSpec.Builder {
@@ -125,8 +146,8 @@ class TypedAssetsCodeGenerator(
                     format = "%T(path=%T(%S), name=%S, hash=%S)",
                     ClassName(WIRED_PACKAGE, ASSET_FILE_TYPE),
                     ClassName("java.io", "File"),
-                    file.relativeTo(assetFolder.parentFile).path,
-                    createAssetName(file.relativeTo(assetFolder)),
+                    file.relativeTo(root.parentFile).path,
+                    createAssetName(file.relativeTo(root)),
                     file.sha1()
                 )
                 .build()

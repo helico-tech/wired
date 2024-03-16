@@ -23,11 +23,11 @@ abstract class WiredPlugin: Plugin<Project> {
             WiredExtension::class.java
         )
 
-        tasks.register(
+        /*tasks.register(
             DownloadVendorDependenciesTask.NAME,
             DownloadVendorDependenciesTask::class.java,
             extension
-        )
+        )*/
 
         tasks.register(
             InitializeDirectoriesTask.NAME,
@@ -42,21 +42,21 @@ abstract class WiredPlugin: Plugin<Project> {
         )
 
         afterEvaluate {
-            tasks.getByName(DownloadVendorDependenciesTask.NAME).dependsOn(tasks.getByName(InitializeDirectoriesTask.NAME))
+            //tasks.getByName(DownloadVendorDependenciesTask.NAME).dependsOn(tasks.getByName(InitializeDirectoriesTask.NAME))
 
-            tasks.getByName(GenerateTypedAssetsTask.NAME) {
-                dependsOn(tasks.getByName(DownloadVendorDependenciesTask.NAME))
+            /*tasks.getByName(GenerateTypedAssetsTask.NAME) {
+                //dependsOn(tasks.getByName(DownloadVendorDependenciesTask.NAME))
 
                 doLast {
                     (this as GenerateTypedAssetsTask).registerSourceSet()
                 }
-            }
+            }*/
 
-            tasks.getByName("processResources").dependsOn(tasks.getByName(DownloadVendorDependenciesTask.NAME))
+            // tasks.getByName("processResources").dependsOn(tasks.getByName(DownloadVendorDependenciesTask.NAME))
 
-            tasks.getByName("compileKotlin") {
+            /*tasks.getByName("compileKotlin") {
                 dependsOn(tasks.getByName(GenerateTypedAssetsTask.NAME))
-            }
+            }*/
         }
     }
 }

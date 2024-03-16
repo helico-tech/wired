@@ -9,9 +9,9 @@ plugins {
 wired {
     packageName.set("nl.helicotech.wired.example.assets")
 
-    vendor("@hotwired/turbo", "7.3.0")
+    /*vendor("@hotwired/turbo", "7.3.0")
     vendor("@hotwired/stimulus", "3.2.2")
-    vendor("zod", "3.22.4")
+    vendor("zod", "3.22.4")*/
 }
 
 application {

@@ -7,3 +7,5 @@ dependencyResolutionManagement {
         }
     }
 }
+
+include("library:asset-mapper")

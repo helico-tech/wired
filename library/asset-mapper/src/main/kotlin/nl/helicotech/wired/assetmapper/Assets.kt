@@ -1,4 +1,4 @@
-package nl.helicotech.wired
+package nl.helicotech.wired.assetmapper
 
 import java.io.File
 

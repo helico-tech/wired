@@ -4,7 +4,6 @@ import nl.helicotech.wired.plugin.WiredExtension
 import nl.helicotech.wired.plugin.WiredPlugin
 import nl.helicotech.wired.plugin.codegen.TypedAssetsCodeGenerator
 import org.gradle.api.DefaultTask
-import org.gradle.api.Project
 import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME
 import org.gradle.api.tasks.SourceSetContainer
@@ -29,11 +28,14 @@ abstract class GenerateTypedAssetsTask @Inject() constructor(
 
     @TaskAction
     fun run() {
-        val fileName = "Assets.kt"
+        /*val fileName = "Assets.kt"
+
+        val assets = listOf(extension.vendorDirectory.get()) + extension.assetsDirectory.get().listFiles().orEmpty()
+
         val generator = TypedAssetsCodeGenerator(
             packageName = requireNotNull(extension.packageName.orNull) {  "Package name must be set" },
             fileName = fileName,
-            assetFolder = extension.assetsDirectory.get()
+            assetFolders = assets.filter { !it.name.startsWith(".") }.toTypedArray()
         )
 
         val file = extension.generatedDirectory.get().resolve(fileName)
@@ -43,13 +45,13 @@ abstract class GenerateTypedAssetsTask @Inject() constructor(
             file.parentFile.mkdirs()
             file.createNewFile()
         }
-        file.writeText(generator.generate().toString())
+        file.writeText(generator.generate().toString())*/
     }
 
     fun registerSourceSet() {
         val main = sourceSetContainer[MAIN_SOURCE_SET_NAME]
         (main.extensions["kotlin"] as SourceDirectorySet).apply {
-            srcDir(extension.generatedDirectory.get())
+            srcDir(extension.buildDirectory.get())
         }
     }
 }

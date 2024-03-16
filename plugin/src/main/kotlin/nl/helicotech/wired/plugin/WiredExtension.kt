@@ -17,7 +17,8 @@ abstract class WiredExtension @Inject constructor(
     companion object {
         val NAME = "wired"
 
-        val DEFAULT_GENERATED_DIRECTORY = "generated/${NAME}"
+        val DEFAULT_BUILD_WIRED_DIRECTORY = "wired"
+        val DEFAULT_GENERATED_DIRECTORY = "generated"
 
         val DEFAULT_ASSETS_DIRECTORY = "assets"
         val DEFAULT_VENDOR_DIRECTORY = "vendor"
@@ -29,6 +30,8 @@ abstract class WiredExtension @Inject constructor(
     abstract val vendorDirectory: Property<File>
     abstract val jsDirectory: Property<File>
     abstract val cssDirectory: Property<File>
+
+    abstract val buildDirectory: Property<File>
     abstract val generatedDirectory: Property<File>
 
     abstract val vendors: Property<Vendors>
@@ -40,12 +43,13 @@ abstract class WiredExtension @Inject constructor(
         val resourcesDirectory = sourceSetContainer.getByName(MAIN_SOURCE_SET_NAME).resources.srcDirs.first()
 
         assetsDirectory.convention(resourcesDirectory.resolve(DEFAULT_ASSETS_DIRECTORY))
-        vendorDirectory.convention(assetsDirectory.get().resolve(DEFAULT_VENDOR_DIRECTORY))
         jsDirectory.convention(assetsDirectory.get().resolve(DEFAULT_JS_DIRECTORY))
         cssDirectory.convention(assetsDirectory.get().resolve(DEFAULT_CSS_DIRECTORY))
 
-        generatedDirectory.convention(project.layout.buildDirectory.asFile.get().resolve(DEFAULT_GENERATED_DIRECTORY))
+        buildDirectory.convention(project.layout.buildDirectory.asFile.get().resolve(DEFAULT_BUILD_WIRED_DIRECTORY))
+        generatedDirectory.convention(buildDirectory.get().resolve(DEFAULT_GENERATED_DIRECTORY))
+        vendorDirectory.convention(buildDirectory.get().resolve(DEFAULT_ASSETS_DIRECTORY).resolve(DEFAULT_VENDOR_DIRECTORY))
     }
 
-    fun vendor(packageName: String, version: String) = vendors.get().vendor(packageName, version)
+    //fun vendor(packageName: String, version: String) = vendors.get().vendor(packageName, version)
 }

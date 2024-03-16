@@ -41,13 +41,13 @@ abstract class DownloadVendorDependenciesTask @Inject constructor(
     }
 
     private fun cleanVendorDirectory() {
-        val vendorDirectory = extension.vendorDirectory.get()
+        /*val vendorDirectory = extension.vendorDirectory.get()
         if (vendorDirectory.exists()) {
             logger.log(LogLevel.INFO, "Cleaning vendor directory")
             vendorDirectory.deleteRecursively()
         }
 
-        vendorDirectory.mkdirs()
+        vendorDirectory.mkdirs()*/
     }
 
     private suspend fun downloadVendorDependencies() {
@@ -66,11 +66,11 @@ abstract class DownloadVendorDependenciesTask @Inject constructor(
 
         val fileName = generateFileName(dependency, result.contentType)
 
-        val outputFile = File(extension.vendorDirectory.get(), fileName)
+        //val outputFile = File(extension.vendorDirectory.get(), fileName)
 
-        outputFile.parentFile.mkdirs()
+        //outputFile.parentFile.mkdirs()
 
-        outputFile.writeText(result.contents)
+        //outputFile.writeText(result.contents)
     }
 
     private fun generateFileName(dependency: Vendors.Vendor, contentType: ContentType): String {
