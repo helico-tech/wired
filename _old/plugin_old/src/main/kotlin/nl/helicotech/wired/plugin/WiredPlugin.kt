@@ -1,8 +1,14 @@
 package nl.helicotech.wired.plugin
 
-import nl.helicotech.wired.assetmapper.Assets
+import nl.helicotech.wired.plugin.tasks.DownloadVendorDependenciesTask
+import nl.helicotech.wired.plugin.tasks.GenerateTypedAssetsTask
+import nl.helicotech.wired.plugin.tasks.InitializeDirectoriesTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.SourceDirectorySet
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.kotlin.dsl.get
 
 abstract class WiredPlugin: Plugin<Project> {
 
@@ -23,7 +29,7 @@ abstract class WiredPlugin: Plugin<Project> {
             extension
         )*/
 
-        /*tasks.register(
+        tasks.register(
             InitializeDirectoriesTask.NAME,
             InitializeDirectoriesTask::class.java,
             extension
@@ -33,7 +39,7 @@ abstract class WiredPlugin: Plugin<Project> {
             GenerateTypedAssetsTask.NAME,
             GenerateTypedAssetsTask::class.java,
             extension
-        )*/
+        )
 
         afterEvaluate {
             //tasks.getByName(DownloadVendorDependenciesTask.NAME).dependsOn(tasks.getByName(InitializeDirectoriesTask.NAME))

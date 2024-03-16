@@ -1,5 +1,6 @@
 package nl.helicotech.wired.plugin
 
+import nl.helicotech.wired.plugin.data.Vendors
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -33,11 +34,11 @@ abstract class WiredExtension @Inject constructor(
     abstract val buildDirectory: Property<File>
     abstract val generatedDirectory: Property<File>
 
-    //abstract val vendors: Property<Vendors>
+    abstract val vendors: Property<Vendors>
     abstract val packageName: Property<String?>
 
     init {
-        //vendors.convention(objectFactory.newInstance(Vendors::class.java))
+        vendors.convention(objectFactory.newInstance(Vendors::class.java))
 
         val resourcesDirectory = sourceSetContainer.getByName(MAIN_SOURCE_SET_NAME).resources.srcDirs.first()
 

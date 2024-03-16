@@ -1,4 +1,4 @@
-rootProject.name = "wired-plugin"
+rootProject.name = "wired-shared"
 
 dependencyResolutionManagement {
     versionCatalogs {
@@ -8,4 +8,4 @@ dependencyResolutionManagement {
     }
 }
 
-includeBuild("../shared")
+include("asset-mapper")

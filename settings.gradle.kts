@@ -1,7 +1,13 @@
 rootProject.name = "wired"
 
+includeBuild("shared")
 includeBuild("plugin")
+includeBuild("examples")
 
-include("library:asset-mapper")
-include("library:core")
-include("examples:basic")
+includeBuild("core")
+
+//includeBuild("plugin")
+
+//include("library:asset-mapper")
+//include("library:core")
+//include("examples:basic")
