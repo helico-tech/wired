@@ -1,6 +1,5 @@
 package nl.helicotech.wired.plugin
 
-import nl.helicotech.wired.assetmapper.Assets
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
