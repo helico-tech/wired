@@ -1,4 +1,5 @@
-import nl.helicotech.wired.assetmapper.*
+package nl.helicotech.wired.assetmapper
+
 import java.io.File
 
 typealias IgnoreRule = (File) -> Boolean
