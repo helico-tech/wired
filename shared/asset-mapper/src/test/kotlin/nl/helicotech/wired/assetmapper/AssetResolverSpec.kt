@@ -4,14 +4,14 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import java.io.File
 
-class AssetCollectionResolverSpec : DescribeSpec({
+class AssetResolverSpec : DescribeSpec({
 
     fun loadResource(name: String): File {
         return File(javaClass.classLoader.getResource(name)!!.file)
     }
 
-    describe("AssetCollectionResolver") {
-        val resolver = AssetCollectionResolver()
+    describe(AssetResolver::class.simpleName!!) {
+        val resolver = AssetResolver()
 
         it("should resolve a directory with files in it") {
             val root = resolver.resolve(loadResource("asset-mapper/asset-folder-1"))

@@ -4,15 +4,15 @@ import java.io.File
 
 typealias IgnoreRule = (File) -> Boolean
 
-class AssetCollectionResolver(
+class AssetResolver(
     val ignoreRules: List<IgnoreRule> = DEFAULT_IGNORE_RULES,
     val hasher: FileHasher = SHA1FileHasher()
 ) {
-    fun resolve(root: File): AssetCollection {
+    fun resolve(root: File): AssetDirectory {
         require(root.exists() && root.isDirectory) { "Root does not exist or is not a directory" }
 
         val directory = resolveDirectory(root)
-        return AssetCollection(listOf(root), directory.directories, directory.files)
+        return AssetDirectory(root, directory.directories, directory.files)
     }
 
     private fun resolveDirectory(folder: File): AssetDirectory {
