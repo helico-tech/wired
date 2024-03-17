@@ -23,7 +23,10 @@ class AssetCollectionResolverSpec : DescribeSpec({
             root.directories[0].files.size shouldBe 0
 
             root.files[0].file.name shouldBe "javascript.js"
+            root.files[0].hash shouldBe "79f6e68bcfc3041cfe3a36d4f3683b745153f44a"
+
             root.files[1].file.name shouldBe "stylesheet.css"
+            root.files[1].hash shouldBe "3b6fe7f23a0c5613628b4d395d4c5114c1699163"
         }
     }
 })
