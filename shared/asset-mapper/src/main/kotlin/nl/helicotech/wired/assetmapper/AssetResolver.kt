@@ -8,28 +8,28 @@ class AssetResolver(
     val ignoreRules: List<IgnoreRule> = DEFAULT_IGNORE_RULES,
     val hasher: FileHasher = SHA1FileHasher()
 ) {
-    fun resolve(root: File): AssetDirectory {
+    fun resolve(root: File): Asset.Directory {
         require(root.exists() && root.isDirectory) { "Root does not exist or is not a directory" }
 
         val directory = resolveDirectory(root)
-        return AssetDirectory(root, directory.directories, directory.files)
+        return assetDirectory(root, directory.directories, directory.files)
     }
 
-    private fun resolveDirectory(folder: File): AssetDirectory {
+    private fun resolveDirectory(folder: File): Asset.Directory {
         require(folder.exists() && folder.isDirectory) { "Folder does not exist or is not a directory" }
 
-        val folders = mutableListOf<AssetDirectory>()
-        val files = mutableListOf<AssetFile>()
+        val folders = mutableListOf<Asset.Directory>()
+        val files = mutableListOf<Asset.File>()
 
         folder.listFiles()?.filter { !ignoreRules.any { rule -> rule(it) }  }?.forEach {
             if (it.isDirectory) {
                 folders.add(resolveDirectory(it))
             } else {
-                files.add(AssetFile(it, hash = hasher.hash(it)))
+                files.add(assetFile(it, hash = hasher.hash(it)))
             }
         }
 
-        return AssetDirectory(folder, folders, files)
+        return assetDirectory(folder, folders, files)
     }
 
     companion object {
