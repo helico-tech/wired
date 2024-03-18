@@ -6,10 +6,6 @@ import java.io.File
 
 class AssetResolverSpec : DescribeSpec({
 
-    fun loadResource(name: String): File {
-        return File(javaClass.classLoader.getResource(name)!!.file)
-    }
-
     describe(AssetResolver::class.simpleName!!) {
         val resolver = AssetResolver()
 

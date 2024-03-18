@@ -3,7 +3,8 @@ package nl.helicotech.wired.assetmapper
 import java.io.File
 
 sealed interface Asset {
-    val name: String
+    val file: java.io.File
+    val name get() = file.name
 
     interface Directory : Asset {
         val directories: List<Directory>
@@ -12,7 +13,6 @@ sealed interface Asset {
 
     interface File : Asset {
         val hash: String
-        val file: java.io.File
     }
 }
 
@@ -24,7 +24,7 @@ fun assetDirectory(
     require(directory.exists() && directory.isDirectory) { "Root does not exist or is not a directory" }
 
     return object : Asset.Directory {
-        override val name = directory.name
+        override val file: File = directory
         override val directories = directories
         override val files = files
     }
@@ -37,7 +37,6 @@ fun assetFile(
     require(file.exists() && file.isFile) { "File does not exist or is not a file" }
 
     return object : Asset.File {
-        override val name = file.name
         override val hash = hash
         override val file = file
     }

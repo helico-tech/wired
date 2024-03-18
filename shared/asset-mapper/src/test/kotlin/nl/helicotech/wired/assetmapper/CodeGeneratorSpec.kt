@@ -1,16 +1,15 @@
 package nl.helicotech.wired.assetmapper
 
 import io.kotest.core.spec.style.DescribeSpec
-import java.io.File
 
 class CodeGeneratorSpec : DescribeSpec({
     describe("CodeGenerator") {
 
-        val codeGenerator = CodeGenerator()
+        val directory = AssetResolver().resolve(loadResource("asset-mapper/asset-folder-1"))
+        val codeGenerator = CodeGenerator(directory)
 
         it("should generate a file") {
-            val directory = assetDirectory(directory = File("foo"))
-            val spec = codeGenerator.generate("Assets", "my.package.assets", directory)
+            val spec = codeGenerator.generate("Assets", "my.package.assets")
             val result = spec.toString()
 
             println(result)
