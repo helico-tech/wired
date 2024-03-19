@@ -29,10 +29,6 @@ abstract class WiredExtension @Inject constructor(
     val vendorConfiguration : VendorConfiguration by lazy { objectFactory.newInstance(VendorConfigurationImpl::class.java, this) }
 
     init {
-        //vendors.convention(objectFactory.newInstance(Vendors::class.java))
-
-        // val resourcesDirectory = sourceSetContainer.getByName(MAIN_SOURCE_SET_NAME).resources.srcDirs.first()
-
         buildDirectory.convention(project.layout.buildDirectory.asFile.get().resolve(NAME))
         generatedDirectory.convention(buildDirectory.get().resolve("generated"))
         generatedSourceDirectory.convention(generatedDirectory.get().resolve("kotlin"))

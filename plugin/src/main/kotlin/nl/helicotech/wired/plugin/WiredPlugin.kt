@@ -1,6 +1,7 @@
 package nl.helicotech.wired.plugin
 
 import nl.helicotech.wired.plugin.assetmapper.GenerateTypedAssetsTask
+import nl.helicotech.wired.plugin.assetmapper.TransformAssetsTask
 import nl.helicotech.wired.plugin.vendors.DownloadVendorsTask
 import org.apache.tools.ant.types.spi.Provider
 import org.gradle.api.Plugin
@@ -21,10 +22,18 @@ abstract class WiredPlugin: Plugin<Project> {
         )
 
         registerVendorDownloadTask(target, extension)
-       val generateTypedAssetsTask = registerGenerateTypedAssetsTask(target, extension)
+        val generateTypedAssetsTask = registerGenerateTypedAssetsTask(target, extension)
+        val transformAssetsTask = registerTransformAssetsTask(target, extension)
 
-        project.afterEvaluate {
-            generateTypedAssetsTask.get().removeResourcesFromProcessResourcesTask()
+        afterEvaluate {
+            generateTypedAssetsTask.get().apply {
+                registerSourceSet()
+            }
+
+            transformAssetsTask.get().apply {
+                removeResourcesFromProcessResourcesTask()
+                registerResources()
+            }
         }
     }
 
@@ -40,6 +49,14 @@ abstract class WiredPlugin: Plugin<Project> {
         return target.tasks.register(
             GenerateTypedAssetsTask.NAME,
             GenerateTypedAssetsTask::class.java,
+            extension
+        )
+    }
+
+    private fun registerTransformAssetsTask(target: Project, extension: WiredExtension): TaskProvider<TransformAssetsTask> {
+        return target.tasks.register(
+            TransformAssetsTask.NAME,
+            TransformAssetsTask::class.java,
             extension
         )
     }

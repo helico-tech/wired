@@ -44,11 +44,10 @@ abstract class GenerateTypedAssetsTask @Inject constructor(
         extension.assetMapperConfiguration.assetDirectories.forEach { directory ->
             generateTypedAsset(directory)
         }
-        registerSourceSet()
     }
 
 
-    private fun registerSourceSet() {
+    fun registerSourceSet() {
         val main = sourceSetContainer.getByName(MAIN_SOURCE_SET_NAME)
         (main.extensions.getByName("kotlin") as SourceDirectorySet).apply {
             srcDir(extension.generatedSourceDirectory.get())
@@ -82,14 +81,5 @@ abstract class GenerateTypedAssetsTask @Inject constructor(
         }
 
         outputFile.writeText(source)
-    }
-
-    fun removeResourcesFromProcessResourcesTask() {
-        val processResourcesTask = project.tasks.withType(ProcessResources::class.java).firstOrNull() ?: return
-        val assetDirectories = extension.assetMapperConfiguration.assetDirectories.map { project.file(it) }
-
-        processResourcesTask.exclude {
-            assetDirectories.any { assetDirectory -> it.file.canonicalPath.startsWith(assetDirectory.canonicalPath) }
-        }
     }
 }

@@ -41,3 +41,14 @@ fun assetFile(
         override val file = file
     }
 }
+
+fun Asset.traverse(): Sequence<Asset> = sequence {
+    yield(this@traverse)
+    if (this@traverse is Asset.Directory) {
+        yieldAll(directories.asSequence().flatMap { it.traverse() })
+        yieldAll(files.asSequence())
+    }
+}
+
+fun Asset.traverseFiles(): Sequence<Asset.File> = traverse().filterIsInstance<Asset.File>()
+fun Asset.traverseDirectories(): Sequence<Asset.Directory> = traverse().filterIsInstance<Asset.Directory>()

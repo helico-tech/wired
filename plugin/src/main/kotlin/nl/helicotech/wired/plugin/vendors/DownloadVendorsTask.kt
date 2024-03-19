@@ -66,7 +66,9 @@ abstract class DownloadVendorsTask @Inject constructor(
 
         val fileName = generateFileName(dependency, result)
 
-        val outputFile = File(downloadDirectory, fileName)
+        val extension = result.fileExtensions().first()
+
+        val outputFile = File(downloadDirectory.resolve(extension), fileName)
 
         outputFile.parentFile.mkdirs()
 
