@@ -5,7 +5,7 @@ plugins {
 
 wired {
     assetMapper {
-        packageName.set("my.package.assets")
+        packageName.set("nl.helicotech.wired.examples.minimal.assets")
 
         include("src/main/resources/assets")
         include("build/wired/vendors")
@@ -15,4 +15,8 @@ wired {
         include("@hotwired/turbo", "8.0.4")
         include("@hotwired/stimulus", "3.2.2")
     }
+}
+
+dependencies {
+    implementation("nl.helicotech.wired.shared:asset-mapper")
 }

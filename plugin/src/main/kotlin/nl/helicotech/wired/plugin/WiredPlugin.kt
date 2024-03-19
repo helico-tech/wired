@@ -28,6 +28,7 @@ abstract class WiredPlugin: Plugin<Project> {
             tasks.getByName("compileKotlin").dependsOn(generateTypedAssetsTask)
 
             generateTypedAssetsTask.get().dependsOn(vendorDownloadTask)
+            generateTypedAssetsTask.get().registerSourceSet()
             //tasks.getByName(DownloadVendorDependenciesTask.NAME).dependsOn(tasks.getByName(InitializeDirectoriesTask.NAME))
 
             /*tasks.getByName(GenerateTypedAssetsTask.NAME) {

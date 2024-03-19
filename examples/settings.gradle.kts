@@ -8,4 +8,6 @@ dependencyResolutionManagement {
     }
 }
 
+includeBuild("../shared")
+
 include("basic")
