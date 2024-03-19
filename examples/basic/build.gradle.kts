@@ -5,6 +5,8 @@ plugins {
 
 wired {
     assetMapper {
+        packageName.set("my.package.assets")
+
         include("src/main/resources/assets")
         include("build/wired/vendors")
     }

@@ -6,7 +6,7 @@ typealias IgnoreRule = (File) -> Boolean
 
 class AssetResolver(
     val ignoreRules: List<IgnoreRule> = DEFAULT_IGNORE_RULES,
-    val hasher: FileHasher = SHA1FileHasher()
+    val hasher: FileHasher = SHA1FileHasher(),
 ) {
     fun resolve(root: File): Asset.Directory {
         require(root.exists() && root.isDirectory) { "Root does not exist or is not a directory" }

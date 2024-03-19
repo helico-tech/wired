@@ -5,19 +5,22 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.io.File
 
 class CodeGenerator(
-    val rootDirectory: Asset.Directory,
-    val settings: Settings = Settings.DEFAULT,
-    private val nameAllocator: NameAllocator = NameAllocator()
+    val rootAsset: Asset.Directory,
+    val rootDirectoryOverride: File? = null,
+    val rootObjectNameOverride: String? = null,
+    val types: Types = Types.DEFAULT,
 ) {
 
-    data class Settings(
+    private val nameAllocator: NameAllocator = NameAllocator()
+
+    data class Types(
         val wiredAssetMapperPackage: String,
         val assetType: String,
         val assetDirectoryType: String,
         val assetFileType: String
     ) {
         companion object {
-            val DEFAULT = Settings(
+            val DEFAULT = Types(
                 wiredAssetMapperPackage = Asset::class.java.packageName,
                 assetType = Asset::class.simpleName!!,
                 assetDirectoryType = Asset.Directory::class.simpleName!!,
@@ -26,16 +29,21 @@ class CodeGenerator(
         }
     }
 
-    private val assetDirectoryClassName = ClassName(this.settings.wiredAssetMapperPackage, this.settings.assetType, this.settings.assetDirectoryType)
-    private val assetFileClassName = ClassName(this.settings.wiredAssetMapperPackage, this.settings.assetType, this.settings.assetFileType)
+    private val assetDirectoryClassName = ClassName(this.types.wiredAssetMapperPackage, this.types.assetType, this.types.assetDirectoryType)
+    private val assetFileClassName = ClassName(this.types.wiredAssetMapperPackage, this.types.assetType, this.types.assetFileType)
 
     fun generate(
         fileName: String,
         packageName: String,
     ) = FileSpec
         .builder(packageName, fileName)
-        .assetDirectory(rootDirectory)
+        .assetDirectory(rootAsset)
         .build()
+
+    fun generateString(
+        fileName: String,
+        packageName: String,
+    ) = generate(fileName, packageName).toString()
 
     private fun FileSpec.Builder.assetDirectory(assetDirectory: Asset.Directory) = addType(assetDirectoryType(assetDirectory))
     private fun TypeSpec.Builder.assetDirectory(assetDirectory: Asset.Directory) = addType(assetDirectoryType(assetDirectory))
@@ -119,6 +127,11 @@ class CodeGenerator(
     }
 
     private fun fileProperty(asset: Asset): PropertySpec {
+        val file = when (asset.file) {
+            rootAsset.file -> rootDirectoryOverride ?: asset.file
+            else -> asset.file.relativeTo(rootAsset.file)
+        }
+
         val builder = PropertySpec.builder(
             name = "file",
             type = File::class,
@@ -126,7 +139,7 @@ class CodeGenerator(
         ).initializer(
             format = "%T(%S)",
             File::class,
-            asset.file.relativeTo(rootDirectory.file)
+            file
         )
 
         return builder.build()
@@ -142,5 +155,11 @@ class CodeGenerator(
         return builder.build()
     }
 
-    private fun assetName(asset: Asset) = nameAllocator.newName(asset.name, asset.file)
+    private fun assetName(asset: Asset): String {
+        val name = when (asset) {
+            rootAsset -> rootObjectNameOverride ?: asset.file.name
+            else -> asset.file.name
+        }
+        return nameAllocator.newName(name, asset.file)
+    }
 }

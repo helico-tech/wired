@@ -1,35 +1,36 @@
 package nl.helicotech.wired.plugin.assetmapper
 
-import nl.helicotech.wired.assetmapper.Asset
-import nl.helicotech.wired.assetmapper.AssetResolver
+import nl.helicotech.wired.plugin.WiredExtension
 import org.gradle.api.Project
+import org.gradle.api.provider.Property
 import java.io.File
 import javax.inject.Inject
 
 interface AssetMapperConfiguration {
-    val assetDirectories: Set<Asset.Directory>
+
+    val packageName: Property<String>
+    val generatedSourceDirectory: Property<File>
+    val generatedResourceDirectory: Property<File>
+
+    val assetDirectories: Set<File>
     fun include(directory: File)
     fun include(directory: String) = include(File(directory))
 }
 
 abstract class AssetMapperConfigurationImpl @Inject constructor(
     private val project: Project,
+    private val extension: WiredExtension
 ) : AssetMapperConfiguration {
 
-    private val assetResolver: AssetResolver = AssetResolver()
+    override val assetDirectories = mutableSetOf<File>()
 
-    override val assetDirectories = mutableSetOf<Asset.Directory>()
+    init {
+        generatedSourceDirectory.convention(extension.generatedSourceDirectory.get().resolve("asset-mapper"))
+        generatedResourceDirectory.convention(extension.generatedResourcesDirectory.get().resolve("asset-mapper"))
+    }
+
     override fun include(directory: File) {
-        if (!directory.isAbsolute) {
-            include(project.file(directory))
-            return
-        }
-
-        require(directory.exists()) { "File $directory does not exist" }
-        require(directory.isDirectory) { "Directory $directory is not a directory" }
-
-        val assets = assetResolver.resolve(directory)
-        project.logger.lifecycle("Adding asset directory {}", assets.file)
-        assetDirectories.add(assets)
+        project.logger.lifecycle("Adding asset directory {}", directory)
+        assetDirectories.add(directory)
     }
 }

@@ -21,8 +21,11 @@ abstract class WiredExtension @Inject constructor(
     }
 
     abstract val buildDirectory : Property<File>
+    abstract val generatedDirectory : Property<File>
+    abstract val generatedSourceDirectory : Property<File>
+    abstract val generatedResourcesDirectory : Property<File>
 
-    val assetMapperConfiguration : AssetMapperConfiguration by lazy { objectFactory.newInstance(AssetMapperConfigurationImpl::class.java) }
+    val assetMapperConfiguration : AssetMapperConfiguration by lazy { objectFactory.newInstance(AssetMapperConfigurationImpl::class.java, this) }
     val vendorConfiguration : VendorConfiguration by lazy { objectFactory.newInstance(VendorConfigurationImpl::class.java, this) }
 
     init {
@@ -31,8 +34,9 @@ abstract class WiredExtension @Inject constructor(
         // val resourcesDirectory = sourceSetContainer.getByName(MAIN_SOURCE_SET_NAME).resources.srcDirs.first()
 
         buildDirectory.convention(project.layout.buildDirectory.asFile.get().resolve(NAME))
-        //generatedDirectory.convention(buildDirectory.get().resolve(DEFAULT_GENERATED_DIRECTORY))
-        //vendorDirectory.convention(buildDirectory.get().resolve(DEFAULT_ASSETS_DIRECTORY).resolve(DEFAULT_VENDOR_DIRECTORY))*/
+        generatedDirectory.convention(buildDirectory.get().resolve("generated"))
+        generatedSourceDirectory.convention(generatedDirectory.get().resolve("kotlin"))
+        generatedResourcesDirectory.convention(generatedDirectory.get().resolve("resources"))
     }
 
     fun assetMapper(action: AssetMapperConfiguration.() -> Unit) {
@@ -42,6 +46,4 @@ abstract class WiredExtension @Inject constructor(
     fun vendors(action: VendorConfiguration.() -> Unit) {
         vendorConfiguration.action()
     }
-
-    //fun vendor(packageName: String, version: String) = vendors.get().vendor(packageName, version)
 }

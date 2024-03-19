@@ -20,7 +20,7 @@ interface VendorConfiguration {
 }
 
 abstract class VendorConfigurationImpl @Inject constructor(
-    private val extension: WiredExtension
+    extension: WiredExtension
 ): VendorConfiguration {
     init {
         downloadDirectory.convention(extension.buildDirectory.get().resolve(VendorConfiguration.DEFAULT_VENDOR_DIRECTORY))
