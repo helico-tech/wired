@@ -6,15 +6,15 @@ import org.gradle.api.Project
 import java.io.File
 import javax.inject.Inject
 
-interface AssetMapperBuilder {
+interface AssetMapperConfiguration {
     val assetDirectories: Set<Asset.Directory>
     fun include(directory: File)
     fun include(directory: String) = include(File(directory))
 }
 
-abstract class AssetMapperBuilderImpl @Inject constructor(
+abstract class AssetMapperConfigurationImpl @Inject constructor(
     private val project: Project,
-) : AssetMapperBuilder {
+) : AssetMapperConfiguration {
 
     private val assetResolver: AssetResolver = AssetResolver()
 

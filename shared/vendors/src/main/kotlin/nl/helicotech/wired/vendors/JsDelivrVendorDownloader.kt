@@ -30,7 +30,7 @@ class JsDelivrVendorDownloader(
         val response = client.get(url)
 
         if (response.status != HttpStatusCode.OK) {
-            throw Exception("Failed to download ESM for ${vendor.packageName}@${vendor.version})
+            throw Exception("Failed to download ESM for ${vendor.packageName}@${vendor.version}")
         }
 
         return VendorDownloader.DownloadResult(

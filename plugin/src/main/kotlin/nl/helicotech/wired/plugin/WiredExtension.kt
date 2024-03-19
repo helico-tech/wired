@@ -1,7 +1,9 @@
 package nl.helicotech.wired.plugin
 
-import nl.helicotech.wired.plugin.assetmapper.AssetMapperBuilder
-import nl.helicotech.wired.plugin.assetmapper.AssetMapperBuilderImpl
+import nl.helicotech.wired.plugin.assetmapper.AssetMapperConfiguration
+import nl.helicotech.wired.plugin.assetmapper.AssetMapperConfigurationImpl
+import nl.helicotech.wired.plugin.vendors.VendorConfiguration
+import nl.helicotech.wired.plugin.vendors.VendorConfigurationImpl
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -13,49 +15,32 @@ import javax.inject.Inject
 abstract class WiredExtension @Inject constructor(
     project: Project,
     objectFactory: ObjectFactory,
-    sourceSetContainer: SourceSetContainer
 ) {
     companion object {
         val NAME = "wired"
-
-        val DEFAULT_BUILD_WIRED_DIRECTORY = "wired"
-        val DEFAULT_GENERATED_DIRECTORY = "generated"
-
-        val DEFAULT_ASSETS_DIRECTORY = "assets"
-        val DEFAULT_VENDOR_DIRECTORY = "vendor"
-        val DEFAULT_JS_DIRECTORY = "js"
-        val DEFAULT_CSS_DIRECTORY = "css"
     }
 
-    abstract val assetsDirectory: Property<File>
-    abstract val vendorDirectory: Property<File>
-    abstract val jsDirectory: Property<File>
-    abstract val cssDirectory: Property<File>
+    abstract val buildDirectory : Property<File>
 
-    abstract val buildDirectory: Property<File>
-    abstract val generatedDirectory: Property<File>
-
-    //abstract val vendors: Property<Vendors>
-    abstract val packageName: Property<String?>
-
-    private val assetMapperBuilder : AssetMapperBuilder by lazy { objectFactory.newInstance(AssetMapperBuilderImpl::class.java) }
+    val assetMapperConfiguration : AssetMapperConfiguration by lazy { objectFactory.newInstance(AssetMapperConfigurationImpl::class.java) }
+    val vendorConfiguration : VendorConfiguration by lazy { objectFactory.newInstance(VendorConfigurationImpl::class.java, this) }
 
     init {
         //vendors.convention(objectFactory.newInstance(Vendors::class.java))
 
-        val resourcesDirectory = sourceSetContainer.getByName(MAIN_SOURCE_SET_NAME).resources.srcDirs.first()
+        // val resourcesDirectory = sourceSetContainer.getByName(MAIN_SOURCE_SET_NAME).resources.srcDirs.first()
 
-        assetsDirectory.convention(resourcesDirectory.resolve(DEFAULT_ASSETS_DIRECTORY))
-        jsDirectory.convention(assetsDirectory.get().resolve(DEFAULT_JS_DIRECTORY))
-        cssDirectory.convention(assetsDirectory.get().resolve(DEFAULT_CSS_DIRECTORY))
-
-        buildDirectory.convention(project.layout.buildDirectory.asFile.get().resolve(DEFAULT_BUILD_WIRED_DIRECTORY))
-        generatedDirectory.convention(buildDirectory.get().resolve(DEFAULT_GENERATED_DIRECTORY))
-        vendorDirectory.convention(buildDirectory.get().resolve(DEFAULT_ASSETS_DIRECTORY).resolve(DEFAULT_VENDOR_DIRECTORY))
+        buildDirectory.convention(project.layout.buildDirectory.asFile.get().resolve(NAME))
+        //generatedDirectory.convention(buildDirectory.get().resolve(DEFAULT_GENERATED_DIRECTORY))
+        //vendorDirectory.convention(buildDirectory.get().resolve(DEFAULT_ASSETS_DIRECTORY).resolve(DEFAULT_VENDOR_DIRECTORY))*/
     }
 
-    fun assetMapper(action: AssetMapperBuilder.() -> Unit) {
-        assetMapperBuilder.action()
+    fun assetMapper(action: AssetMapperConfiguration.() -> Unit) {
+        assetMapperConfiguration.action()
+    }
+
+    fun vendors(action: VendorConfiguration.() -> Unit) {
+        vendorConfiguration.action()
     }
 
     //fun vendor(packageName: String, version: String) = vendors.get().vendor(packageName, version)

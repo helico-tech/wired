@@ -66,11 +66,11 @@ abstract class DownloadVendorDependenciesTask @Inject constructor(
 
         val fileName = generateFileName(dependency, result.contentType)
 
-        //val outputFile = File(extension.vendorDirectory.get(), fileName)
+        val outputFile = File(extension.vendorDirectory.get(), fileName)
 
-        //outputFile.parentFile.mkdirs()
+        outputFile.parentFile.mkdirs()
 
-        //outputFile.writeText(result.contents)
+        outputFile.writeText(result.contents)
     }
 
     private fun generateFileName(dependency: Vendors.Vendor, contentType: ContentType): String {

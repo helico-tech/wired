@@ -1,5 +1,6 @@
 package nl.helicotech.wired.plugin
 
+import nl.helicotech.wired.plugin.vendors.DownloadVendorsTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -35,6 +36,9 @@ abstract class WiredPlugin: Plugin<Project> {
         )*/
 
         afterEvaluate {
+            if (extension.vendorConfiguration.vendors.isNotEmpty()) {
+                registerVendorDownloadTask(target, extension)
+            }
             //tasks.getByName(DownloadVendorDependenciesTask.NAME).dependsOn(tasks.getByName(InitializeDirectoriesTask.NAME))
 
             /*tasks.getByName(GenerateTypedAssetsTask.NAME) {
@@ -51,5 +55,13 @@ abstract class WiredPlugin: Plugin<Project> {
                 dependsOn(tasks.getByName(GenerateTypedAssetsTask.NAME))
             }*/
         }
+    }
+
+    private fun registerVendorDownloadTask(target: Project, extension: WiredExtension) {
+        target.tasks.register(
+            DownloadVendorsTask.NAME,
+            DownloadVendorsTask::class.java,
+            extension
+        )
     }
 }
