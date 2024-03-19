@@ -4,5 +4,7 @@ plugins {
 }
 
 wired {
-
+    assetMapper {
+        include("src/main/resources/assets")
+    }
 }

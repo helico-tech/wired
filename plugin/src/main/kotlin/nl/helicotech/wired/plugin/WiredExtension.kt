@@ -1,5 +1,7 @@
 package nl.helicotech.wired.plugin
 
+import nl.helicotech.wired.plugin.assetmapper.AssetMapperBuilder
+import nl.helicotech.wired.plugin.assetmapper.AssetMapperBuilderImpl
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -36,6 +38,8 @@ abstract class WiredExtension @Inject constructor(
     //abstract val vendors: Property<Vendors>
     abstract val packageName: Property<String?>
 
+    private val assetMapperBuilder : AssetMapperBuilder by lazy { objectFactory.newInstance(AssetMapperBuilderImpl::class.java) }
+
     init {
         //vendors.convention(objectFactory.newInstance(Vendors::class.java))
 
@@ -48,6 +52,10 @@ abstract class WiredExtension @Inject constructor(
         buildDirectory.convention(project.layout.buildDirectory.asFile.get().resolve(DEFAULT_BUILD_WIRED_DIRECTORY))
         generatedDirectory.convention(buildDirectory.get().resolve(DEFAULT_GENERATED_DIRECTORY))
         vendorDirectory.convention(buildDirectory.get().resolve(DEFAULT_ASSETS_DIRECTORY).resolve(DEFAULT_VENDOR_DIRECTORY))
+    }
+
+    fun assetMapper(action: AssetMapperBuilder.() -> Unit) {
+        assetMapperBuilder.action()
     }
 
     //fun vendor(packageName: String, version: String) = vendors.get().vendor(packageName, version)
