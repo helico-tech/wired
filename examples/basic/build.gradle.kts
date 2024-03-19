@@ -6,9 +6,11 @@ plugins {
 wired {
     assetMapper {
         include("src/main/resources/assets")
+        include("build/wired/vendors")
     }
 
     vendors {
         include("@hotwired/turbo", "8.0.4")
+        include("@hotwired/stimulus", "3.2.2")
     }
 }
