@@ -4,12 +4,14 @@ import nl.helicotech.wired.assetmapper.AssetResolver
 import nl.helicotech.wired.assetmapper.CodeGenerator
 import nl.helicotech.wired.plugin.WiredExtension
 import nl.helicotech.wired.plugin.WiredPlugin
+import nl.helicotech.wired.plugin.vendors.DownloadVendorsTask
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
+import org.gradle.language.jvm.tasks.ProcessResources
 import java.io.File
 import java.util.*
 import javax.inject.Inject
@@ -19,17 +21,22 @@ abstract class GenerateTypedAssetsTask @Inject constructor(
     private val sourceSetContainer: SourceSetContainer,
     private val extension: WiredExtension,
 ) : DefaultTask() {
+
     companion object {
         val NAME = "generateTypedAssets"
         val DESCRIPTION = "Generate typed assets"
     }
 
+    private val resolver = AssetResolver()
+
     init {
         group = WiredPlugin.GROUP
         description = DESCRIPTION
-    }
 
-    private val resolver = AssetResolver()
+        this.dependsOn(DownloadVendorsTask.NAME)
+
+        project.tasks.getByName("compileKotlin").dependsOn(this)
+    }
 
     @TaskAction
     fun run() {
@@ -37,9 +44,11 @@ abstract class GenerateTypedAssetsTask @Inject constructor(
         extension.assetMapperConfiguration.assetDirectories.forEach { directory ->
             generateTypedAsset(directory)
         }
+        registerSourceSet()
     }
 
-    fun registerSourceSet() {
+
+    private fun registerSourceSet() {
         val main = sourceSetContainer.getByName(MAIN_SOURCE_SET_NAME)
         (main.extensions.getByName("kotlin") as SourceDirectorySet).apply {
             srcDir(extension.generatedSourceDirectory.get())
@@ -73,5 +82,14 @@ abstract class GenerateTypedAssetsTask @Inject constructor(
         }
 
         outputFile.writeText(source)
+    }
+
+    fun removeResourcesFromProcessResourcesTask() {
+        val processResourcesTask = project.tasks.withType(ProcessResources::class.java).firstOrNull() ?: return
+        val assetDirectories = extension.assetMapperConfiguration.assetDirectories.map { project.file(it) }
+
+        processResourcesTask.exclude {
+            assetDirectories.any { assetDirectory -> it.file.canonicalPath.startsWith(assetDirectory.canonicalPath) }
+        }
     }
 }

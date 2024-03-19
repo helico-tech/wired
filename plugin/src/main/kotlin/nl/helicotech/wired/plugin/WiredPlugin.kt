@@ -20,30 +20,11 @@ abstract class WiredPlugin: Plugin<Project> {
             WiredExtension::class.java
         )
 
-        val vendorDownloadTask = registerVendorDownloadTask(target, extension)
-        val generateTypedAssetsTask = registerGenerateTypedAssetsTask(target, extension)
+        registerVendorDownloadTask(target, extension)
+       val generateTypedAssetsTask = registerGenerateTypedAssetsTask(target, extension)
 
-        afterEvaluate {
-
-            tasks.getByName("compileKotlin").dependsOn(generateTypedAssetsTask)
-
-            generateTypedAssetsTask.get().dependsOn(vendorDownloadTask)
-            generateTypedAssetsTask.get().registerSourceSet()
-            //tasks.getByName(DownloadVendorDependenciesTask.NAME).dependsOn(tasks.getByName(InitializeDirectoriesTask.NAME))
-
-            /*tasks.getByName(GenerateTypedAssetsTask.NAME) {
-                //dependsOn(tasks.getByName(DownloadVendorDependenciesTask.NAME))
-
-                doLast {
-                    (this as GenerateTypedAssetsTask).registerSourceSet()
-                }
-            }*/
-
-            // tasks.getByName("processResources").dependsOn(tasks.getByName(DownloadVendorDependenciesTask.NAME))
-
-            /*tasks.getByName("compileKotlin") {
-                dependsOn(tasks.getByName(GenerateTypedAssetsTask.NAME))
-            }*/
+        project.afterEvaluate {
+            generateTypedAssetsTask.get().removeResourcesFromProcessResourcesTask()
         }
     }
 
