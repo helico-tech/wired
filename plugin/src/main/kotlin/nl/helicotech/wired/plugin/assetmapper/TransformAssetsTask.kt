@@ -46,11 +46,11 @@ abstract class TransformAssetsTask @Inject constructor(
     }
 
     fun removeResourcesFromProcessResourcesTask() {
-        val processResourcesTask = project.tasks.withType(ProcessResources::class.java).firstOrNull() ?: return
         val assetDirectories = extension.assetMapperConfiguration.assetDirectories.map { project.file(it) }
-
-        processResourcesTask.exclude {
-            assetDirectories.any { assetDirectory -> it.file.canonicalPath.startsWith(assetDirectory.canonicalPath) }
+        project.tasks.withType(ProcessResources::class.java).forEach {
+            it.exclude {
+                assetDirectories.any { assetDirectory -> it.file.canonicalPath.startsWith(assetDirectory.canonicalPath) }
+            }
         }
     }
 
