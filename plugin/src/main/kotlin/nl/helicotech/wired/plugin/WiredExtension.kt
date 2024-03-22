@@ -1,6 +1,9 @@
 package nl.helicotech.wired.plugin
 
-import nl.helicotech.wired.plugin.data.Vendors
+import nl.helicotech.wired.plugin.assetmapper.AssetMapperConfiguration
+import nl.helicotech.wired.plugin.assetmapper.AssetMapperConfigurationImpl
+import nl.helicotech.wired.plugin.vendors.VendorConfiguration
+import nl.helicotech.wired.plugin.vendors.VendorConfigurationImpl
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -12,40 +15,31 @@ import javax.inject.Inject
 abstract class WiredExtension @Inject constructor(
     project: Project,
     objectFactory: ObjectFactory,
-    sourceSetContainer: SourceSetContainer
 ) {
     companion object {
         val NAME = "wired"
-
-        val DEFAULT_GENERATED_DIRECTORY = "generated/${NAME}"
-
-        val DEFAULT_ASSETS_DIRECTORY = "assets"
-        val DEFAULT_VENDOR_DIRECTORY = "vendor"
-        val DEFAULT_JS_DIRECTORY = "js"
-        val DEFAULT_CSS_DIRECTORY = "css"
     }
 
-    abstract val assetsDirectory: Property<File>
-    abstract val vendorDirectory: Property<File>
-    abstract val jsDirectory: Property<File>
-    abstract val cssDirectory: Property<File>
-    abstract val generatedDirectory: Property<File>
+    abstract val buildDirectory : Property<File>
+    abstract val generatedDirectory : Property<File>
+    abstract val generatedSourceDirectory : Property<File>
+    abstract val generatedResourcesDirectory : Property<File>
 
-    abstract val vendors: Property<Vendors>
-    abstract val packageName: Property<String?>
+    val assetMapperConfiguration : AssetMapperConfiguration by lazy { objectFactory.newInstance(AssetMapperConfigurationImpl::class.java, this) }
+    val vendorConfiguration : VendorConfiguration by lazy { objectFactory.newInstance(VendorConfigurationImpl::class.java, this) }
 
     init {
-        vendors.convention(objectFactory.newInstance(Vendors::class.java))
-
-        val resourcesDirectory = sourceSetContainer.getByName(MAIN_SOURCE_SET_NAME).resources.srcDirs.first()
-
-        assetsDirectory.convention(resourcesDirectory.resolve(DEFAULT_ASSETS_DIRECTORY))
-        vendorDirectory.convention(assetsDirectory.get().resolve(DEFAULT_VENDOR_DIRECTORY))
-        jsDirectory.convention(assetsDirectory.get().resolve(DEFAULT_JS_DIRECTORY))
-        cssDirectory.convention(assetsDirectory.get().resolve(DEFAULT_CSS_DIRECTORY))
-
-        generatedDirectory.convention(project.layout.buildDirectory.asFile.get().resolve(DEFAULT_GENERATED_DIRECTORY))
+        buildDirectory.convention(project.layout.buildDirectory.asFile.get().resolve(NAME))
+        generatedDirectory.convention(buildDirectory.get().resolve("generated"))
+        generatedSourceDirectory.convention(generatedDirectory.get().resolve("kotlin"))
+        generatedResourcesDirectory.convention(generatedDirectory.get().resolve("resources"))
     }
 
-    fun vendor(packageName: String, version: String) = vendors.get().vendor(packageName, version)
+    fun assetMapper(action: AssetMapperConfiguration.() -> Unit) {
+        assetMapperConfiguration.action()
+    }
+
+    fun vendors(action: VendorConfiguration.() -> Unit) {
+        vendorConfiguration.action()
+    }
 }

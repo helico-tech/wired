@@ -1,6 +1,6 @@
 rootProject.name = "wired"
 
+includeBuild("shared")
 includeBuild("plugin")
-
-include("library:core")
-include("examples:basic")
+includeBuild("examples")
+includeBuild("core")

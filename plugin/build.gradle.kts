@@ -1,4 +1,4 @@
-group = "nl.helicotech.wired.gradle-plugin"
+group = "nl.helicotech.wired"
 
 repositories {
     gradlePluginPortal()
@@ -6,34 +6,26 @@ repositories {
 }
 
 plugins {
+    alias(libs.plugins.kotlin.jvm)
     `java-gradle-plugin`
-    `kotlin-dsl`
-}
-
-sourceSets {
-    main {
-        kotlin {
-            srcDir("src/main/kotlin")
-        }
-    }
 }
 
 gradlePlugin {
     plugins {
         create("wiredPlugin") {
-            id = "nl.helicotech.wired"
+            id = "nl.helicotech.wired.plugin"
             implementationClass = "nl.helicotech.wired.plugin.WiredPlugin"
         }
     }
 }
 
 dependencies {
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.cio)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.serialization.gson)
-    implementation(libs.gson)
+    implementation("nl.helicotech.wired.shared:asset-mapper")
+    implementation("nl.helicotech.wired.shared:vendors")
+
+    implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlin.poet)
+    implementation(libs.ktor.http)
 
     testImplementation(libs.kotlin.test.junit)
     testImplementation(kotlin("test"))

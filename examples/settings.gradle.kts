@@ -1,4 +1,4 @@
-rootProject.name = "wired-plugin"
+rootProject.name = "wired-examples"
 
 dependencyResolutionManagement {
     versionCatalogs {
@@ -9,3 +9,5 @@ dependencyResolutionManagement {
 }
 
 includeBuild("../shared")
+
+include("basic")

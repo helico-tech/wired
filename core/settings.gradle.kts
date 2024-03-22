@@ -1,4 +1,4 @@
-rootProject.name = "wired-plugin"
+rootProject.name = "wired-core"
 
 dependencyResolutionManagement {
     versionCatalogs {
@@ -9,3 +9,5 @@ dependencyResolutionManagement {
 }
 
 includeBuild("../shared")
+
+include("ktor")

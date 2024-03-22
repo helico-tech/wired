@@ -1,14 +1,12 @@
 package nl.helicotech.wired.plugin
 
-import nl.helicotech.wired.plugin.tasks.DownloadVendorDependenciesTask
-import nl.helicotech.wired.plugin.tasks.GenerateTypedAssetsTask
-import nl.helicotech.wired.plugin.tasks.InitializeDirectoriesTask
+import nl.helicotech.wired.plugin.assetmapper.GenerateTypedAssetsTask
+import nl.helicotech.wired.plugin.assetmapper.TransformAssetsTask
+import nl.helicotech.wired.plugin.vendors.DownloadVendorsTask
+import org.apache.tools.ant.types.spi.Provider
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.SourceDirectorySet
-import org.gradle.api.tasks.SourceSet
-import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.kotlin.dsl.get
+import org.gradle.api.tasks.TaskProvider
 
 abstract class WiredPlugin: Plugin<Project> {
 
@@ -23,40 +21,43 @@ abstract class WiredPlugin: Plugin<Project> {
             WiredExtension::class.java
         )
 
-        tasks.register(
-            DownloadVendorDependenciesTask.NAME,
-            DownloadVendorDependenciesTask::class.java,
+        registerVendorDownloadTask(target, extension)
+        val generateTypedAssetsTask = registerGenerateTypedAssetsTask(target, extension)
+        val transformAssetsTask = registerTransformAssetsTask(target, extension)
+
+        afterEvaluate {
+            generateTypedAssetsTask.get().apply {
+                registerSourceSet()
+            }
+
+            transformAssetsTask.get().apply {
+                removeResourcesFromProcessResourcesTask()
+                registerResources()
+            }
+        }
+    }
+
+    private fun registerVendorDownloadTask(target: Project, extension: WiredExtension): TaskProvider<DownloadVendorsTask> {
+        return target.tasks.register(
+            DownloadVendorsTask.NAME,
+            DownloadVendorsTask::class.java,
             extension
         )
+    }
 
-        tasks.register(
-            InitializeDirectoriesTask.NAME,
-            InitializeDirectoriesTask::class.java,
-            extension
-        )
-
-        tasks.register(
+    private fun registerGenerateTypedAssetsTask(target: Project, extension: WiredExtension): TaskProvider<GenerateTypedAssetsTask> {
+        return target.tasks.register(
             GenerateTypedAssetsTask.NAME,
             GenerateTypedAssetsTask::class.java,
             extension
         )
+    }
 
-        afterEvaluate {
-            tasks.getByName(DownloadVendorDependenciesTask.NAME).dependsOn(tasks.getByName(InitializeDirectoriesTask.NAME))
-
-            tasks.getByName(GenerateTypedAssetsTask.NAME) {
-                dependsOn(tasks.getByName(DownloadVendorDependenciesTask.NAME))
-
-                doLast {
-                    (this as GenerateTypedAssetsTask).registerSourceSet()
-                }
-            }
-
-            tasks.getByName("processResources").dependsOn(tasks.getByName(DownloadVendorDependenciesTask.NAME))
-
-            tasks.getByName("compileKotlin") {
-                dependsOn(tasks.getByName(GenerateTypedAssetsTask.NAME))
-            }
-        }
+    private fun registerTransformAssetsTask(target: Project, extension: WiredExtension): TaskProvider<TransformAssetsTask> {
+        return target.tasks.register(
+            TransformAssetsTask.NAME,
+            TransformAssetsTask::class.java,
+            extension
+        )
     }
 }

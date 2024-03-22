@@ -1,32 +1,33 @@
-group = "nl.helicotech.wired.examples.basic"
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
-    id("nl.helicotech.wired")
+    id("nl.helicotech.wired.plugin")
 }
 
 wired {
-    packageName.set("nl.helicotech.wired.example.assets")
+    assetMapper {
+        packageName.set("nl.helicotech.wired.examples.minimal.assets")
 
-    vendor("@hotwired/turbo", "7.3.0")
-    vendor("@hotwired/stimulus", "3.2.2")
-    vendor("zod", "3.22.4")
+        include("src/main/resources/assets")
+        include("build/wired/vendors")
+    }
+
+    vendors {
+        include("@hotwired/turbo", "8.0.4")
+        include("@hotwired/stimulus", "3.2.2")
+    }
 }
 
 application {
-    mainClass.set("nl.helicotech.wired.example.ApplicationKt")
+    mainClass.set("nl.helicotech.wired.examples.minimal.AppKt")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
 }
 
 dependencies {
+    implementation("nl.helicotech.wired.core:ktor")
+    implementation(libs.logback.classic)
+
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
     implementation(libs.ktor.server.html.builder)
-    implementation(libs.logback.classic)
-
-    implementation(project(":library:core"))
-
-    testImplementation(libs.ktor.server.tests)
-    testImplementation(libs.kotlin.test.junit)
 }
