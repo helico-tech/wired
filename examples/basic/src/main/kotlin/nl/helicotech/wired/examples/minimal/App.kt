@@ -9,11 +9,15 @@ import kotlinx.html.*
 import nl.helicotech.wired.assetmapper.fileName
 import nl.helicotech.wired.assetmapper.hashedFile
 import nl.helicotech.wired.assetmapper.traverseFiles
+import nl.helicotech.wired.assetmapper.url
 import nl.helicotech.wired.examples.minimal.assets.Assets
 import nl.helicotech.wired.examples.minimal.assets.Vendors
 import nl.helicotech.wired.ktor.assetmapper.staticTypedAssets
 import nl.helicotech.wired.ktor.assetmapper.importMap
 import nl.helicotech.wired.ktor.assetmapper.module
+import nl.helicotech.wired.turbo.TurboMethod
+import nl.helicotech.wired.turbo.turboConfirm
+import nl.helicotech.wired.turbo.turboMethod
 
 fun main() {
     embeddedServer(
@@ -32,12 +36,19 @@ fun Application.minimal() {
             call.respondHtml {
                 head {
                     importMap(Assets, Vendors)
-                    module(Assets.Js.My_script_js)
+                    module(Vendors.Js.Hotwired.Turbo_js)
                 }
 
                 body {
                     h1 {
                         + "Wired Example"
+                    }
+
+                    a {
+                        href = "/page-two"
+                        turboMethod(TurboMethod.Post)
+                        turboConfirm("Are you sure you want to visit this page?")
+                        + "Go to page two"
                     }
 
                     h2 { + "Typed assets" }
@@ -48,7 +59,9 @@ fun Application.minimal() {
                         ul {
                             directory.traverseFiles().forEach {
                                 li {
-                                    a(href = it.hashedFile().path) { + it.file.name }
+                                    a(href = it.url()) {
+                                        + it.file.name
+                                    }
                                 }
                             }
                         }

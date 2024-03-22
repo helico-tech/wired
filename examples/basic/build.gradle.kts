@@ -24,9 +24,10 @@ application {
 }
 
 dependencies {
-    implementation("nl.helicotech.wired.core:ktor")
-    implementation(libs.logback.classic)
+    implementation("nl.helicotech.wired:ktor")
+    implementation("nl.helicotech.wired:kotlinx-html-turbo")
 
+    implementation(libs.logback.classic)
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
     implementation(libs.ktor.server.html.builder)
