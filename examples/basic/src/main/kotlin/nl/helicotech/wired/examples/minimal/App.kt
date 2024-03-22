@@ -5,17 +5,21 @@ import io.ktor.server.engine.*
 import io.ktor.server.html.*
 import io.ktor.server.netty.*
 import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
+import io.ktor.websocket.*
+import kotlinx.coroutines.delay
 import kotlinx.html.*
 import nl.helicotech.wired.assetmapper.fileName
-import nl.helicotech.wired.assetmapper.hashedFile
 import nl.helicotech.wired.assetmapper.traverseFiles
 import nl.helicotech.wired.assetmapper.url
 import nl.helicotech.wired.examples.minimal.assets.Assets
 import nl.helicotech.wired.examples.minimal.assets.Vendors
-import nl.helicotech.wired.ktor.assetmapper.staticTypedAssets
 import nl.helicotech.wired.ktor.assetmapper.importMap
 import nl.helicotech.wired.ktor.assetmapper.module
+import nl.helicotech.wired.ktor.assetmapper.sendHtml
+import nl.helicotech.wired.ktor.assetmapper.staticTypedAssets
 import nl.helicotech.wired.turbo.*
+import java.time.Duration
 
 fun main() {
     embeddedServer(
@@ -27,18 +31,31 @@ fun main() {
 }
 
 fun Application.minimal() {
+    install(WebSockets) {
+        pingPeriod = Duration.ofSeconds(15)
+        timeout = Duration.ofSeconds(15)
+        maxFrameSize = Long.MAX_VALUE
+        masking = false
+    }
+
     routing {
         staticTypedAssets(Assets, Vendors)
 
         get("/") {
             call.respondTemplate {
+                turboStreamSource("ws://${call.application.environment.config.host}:${call.application.environment.config.port}/turbo-stream")
+
                 h1 {
-                    + "Wired Example"
+                    +"Wired Example"
                 }
 
                 a(href = "/assets") {
                     targetTurboFrame("assets")
-                 + "Assets"
+                    +"Assets"
+                }
+                
+                turboFrame("stream") {
+                    h2 { +"Area for stream" }
                 }
 
                 turboFrame("assets") {
@@ -65,6 +82,21 @@ fun Application.minimal() {
                         }
                     }
                 }
+            }
+        }
+
+        webSocket(path = "/turbo-stream") {
+            while (true) {
+                outgoing.sendHtml {
+                    turboStream(
+                        action = TurboStreamActionType.Append,
+                        target = "stream"
+                    ) {
+                        p { +"Hello, World!" }
+                        p { +"Current time: ${System.currentTimeMillis()}" }
+                    }
+                }
+                delay(1000)
             }
         }
     }

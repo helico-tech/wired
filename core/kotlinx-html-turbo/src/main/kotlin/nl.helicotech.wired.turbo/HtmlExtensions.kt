@@ -25,6 +25,17 @@ sealed class TurboRefreshScrollType(val value: String) {
     data object Reset : TurboRefreshScrollType("reset")
 }
 
+sealed class TurboStreamActionType(val value: String) {
+    data object Append : TurboStreamActionType("append")
+    data object Prepend : TurboStreamActionType("prepend")
+    data object Replace : TurboStreamActionType("replace")
+    data object Update : TurboStreamActionType("update")
+    data object Remove : TurboStreamActionType("remove")
+    data object Before : TurboStreamActionType("before")
+    data object After : TurboStreamActionType("after")
+    data object Morph : TurboStreamActionType("morph")
+    data object Refresh : TurboStreamActionType("refresh")
+}
 
 fun HEAD.enableViewTransition() {
     meta(name = "view-transition", content = "same-origin")
