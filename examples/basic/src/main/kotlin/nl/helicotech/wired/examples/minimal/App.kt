@@ -15,9 +15,7 @@ import nl.helicotech.wired.examples.minimal.assets.Vendors
 import nl.helicotech.wired.ktor.assetmapper.staticTypedAssets
 import nl.helicotech.wired.ktor.assetmapper.importMap
 import nl.helicotech.wired.ktor.assetmapper.module
-import nl.helicotech.wired.turbo.TurboMethod
-import nl.helicotech.wired.turbo.turboConfirm
-import nl.helicotech.wired.turbo.turboMethod
+import nl.helicotech.wired.turbo.*
 
 fun main() {
     embeddedServer(
@@ -33,34 +31,34 @@ fun Application.minimal() {
         staticTypedAssets(Assets, Vendors)
 
         get("/") {
-            call.respondHtml {
-                head {
-                    importMap(Assets, Vendors)
-                    module(Vendors.Js.Hotwired.Turbo_js)
+            call.respondTemplate {
+                h1 {
+                    + "Wired Example"
                 }
 
-                body {
-                    h1 {
-                        + "Wired Example"
-                    }
+                a(href = "/assets") {
+                    targetTurboFrame("assets")
+                 + "Assets"
+                }
 
-                    a {
-                        href = "/page-two"
-                        turboMethod(TurboMethod.Post)
-                        turboConfirm("Are you sure you want to visit this page?")
-                        + "Go to page two"
-                    }
+                turboFrame("assets") {
+                    h2 { +"Area for assets" }
+                }
+            }
+        }
 
-                    h2 { + "Typed assets" }
-
+        get("/assets") {
+            call.respondTemplate {
+                turboFrame("assets") {
+                    h2 { +"Typed assets" }
                     listOf(Assets, Vendors).forEach { directory ->
-                        h3 { + directory.fileName() }
+                        h3 { +directory.fileName() }
 
                         ul {
                             directory.traverseFiles().forEach {
                                 li {
                                     a(href = it.url()) {
-                                        + it.file.name
+                                        +it.fileName()
                                     }
                                 }
                             }
@@ -69,5 +67,22 @@ fun Application.minimal() {
                 }
             }
         }
+    }
+}
+
+suspend fun ApplicationCall.respondTemplate(content: BODY.() -> Unit) {
+    respondHtml {
+        template(content)
+    }
+}
+
+fun HTML.template(content: BODY.() -> Unit) {
+    head {
+        importMap(Assets, Vendors)
+        module(Vendors.Js.Hotwired.Turbo_js)
+    }
+
+    body {
+        content()
     }
 }
