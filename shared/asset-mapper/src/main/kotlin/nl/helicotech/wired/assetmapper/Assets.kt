@@ -3,6 +3,7 @@ package nl.helicotech.wired.assetmapper
 import java.io.File
 
 sealed interface Asset {
+
     val file: java.io.File
 
     interface Directory : Asset {
@@ -52,8 +53,14 @@ fun Asset.traverse(): Sequence<Asset> = sequence {
 fun Asset.fileName() = this.file.name
 
 fun Asset.traverseFiles(): Sequence<Asset.File> = traverse().filterIsInstance<Asset.File>()
+
+fun Iterable<Asset>.traverseFiles(): Sequence<Asset.File> = asSequence().flatMap { it.traverseFiles() }
+
 fun Asset.traverseDirectories(): Sequence<Asset.Directory> = traverse().filterIsInstance<Asset.Directory>()
 
 fun Asset.File.hashedName(): String = "${file.nameWithoutExtension}-${hash}.${file.extension}"
-
 fun Asset.File.hashedFile(): File = file.parentFile.resolve(hashedName())
+
+fun Asset.File.importMapKey(): String = file.parentFile.resolve(file.nameWithoutExtension).path
+
+fun Asset.File.importMapValue(): String = "/${hashedFile().path}"

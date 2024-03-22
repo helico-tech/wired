@@ -9,6 +9,6 @@ fun Routing.asset(asset: Asset, basePackage: String = "asset-mapper") {
     staticResources("/${asset.fileName()}", "${basePackage}/${asset.fileName()}")
 }
 
-fun Routing.assets(vararg assets: Asset, basePackage: String = "asset-mapper") {
+fun Routing.staticTypedAssets(vararg assets: Asset, basePackage: String = "asset-mapper") {
     assets.forEach { asset(it, basePackage) }
 }

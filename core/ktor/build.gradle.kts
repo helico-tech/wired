@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.ktor.server.core)
-
+    api(libs.ktor.server.core)
+    api(libs.ktor.server.html.builder)
     api("nl.helicotech.wired.shared:asset-mapper")
 }
