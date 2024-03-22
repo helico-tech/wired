@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlin.poet)
     testImplementation(libs.kotest.junit)
 }
 

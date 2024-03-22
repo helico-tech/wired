@@ -24,6 +24,7 @@ dependencies {
     implementation("nl.helicotech.wired.shared:vendors")
 
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlin.poet)
 
     testImplementation(libs.kotlin.test.junit)
     testImplementation(kotlin("test"))

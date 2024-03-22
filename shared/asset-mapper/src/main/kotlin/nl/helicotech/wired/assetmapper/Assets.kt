@@ -4,7 +4,6 @@ import java.io.File
 
 sealed interface Asset {
     val file: java.io.File
-    val name get() = file.name
 
     interface Directory : Asset {
         val directories: List<Directory>
@@ -50,5 +49,11 @@ fun Asset.traverse(): Sequence<Asset> = sequence {
     }
 }
 
+fun Asset.fileName() = this.file.name
+
 fun Asset.traverseFiles(): Sequence<Asset.File> = traverse().filterIsInstance<Asset.File>()
 fun Asset.traverseDirectories(): Sequence<Asset.Directory> = traverse().filterIsInstance<Asset.Directory>()
+
+fun Asset.File.hashedName(): String = "${file.nameWithoutExtension}-${hash}.${file.extension}"
+
+fun Asset.File.hashedFile(): File = file.parentFile.resolve(hashedName())

@@ -30,7 +30,6 @@ abstract class AssetMapperConfigurationImpl @Inject constructor(
     }
 
     override fun include(directory: File) {
-        project.logger.lifecycle("Adding asset directory {}", directory)
         assetDirectories.add(directory)
     }
 }

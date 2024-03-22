@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.ktor)
     id("nl.helicotech.wired.plugin")
 }
 
@@ -17,6 +18,16 @@ wired {
     }
 }
 
+application {
+    mainClass.set("nl.helicotech.wired.examples.minimal.AppKt")
+    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
+}
+
 dependencies {
-    implementation("nl.helicotech.wired.shared:asset-mapper")
+    implementation("nl.helicotech.wired.core:ktor")
+    implementation(libs.logback.classic)
+
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.server.html.builder)
 }

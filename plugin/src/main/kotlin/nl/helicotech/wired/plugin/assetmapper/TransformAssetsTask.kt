@@ -1,6 +1,8 @@
 package nl.helicotech.wired.plugin.assetmapper
 
 import nl.helicotech.wired.assetmapper.AssetResolver
+import nl.helicotech.wired.assetmapper.hashedFile
+import nl.helicotech.wired.assetmapper.hashedName
 import nl.helicotech.wired.assetmapper.traverseFiles
 import nl.helicotech.wired.plugin.WiredExtension
 import nl.helicotech.wired.plugin.WiredPlugin
@@ -66,11 +68,8 @@ abstract class TransformAssetsTask @Inject constructor(
 
         rootAsset.traverseFiles().forEach { asset ->
 
-            val relativeFile = asset.file.relativeTo(rootDirectory)
-
-            val hashName = File(relativeFile.parentFile, "${asset.file.nameWithoutExtension}-${asset.hash}.${asset.file.extension}")
-
-            val outputFile = extension.assetMapperConfiguration.generatedResourceDirectory.get().resolve(hashName)
+            val relativeFile = asset.hashedFile().relativeTo(rootDirectory.parentFile)
+            val outputFile = extension.assetMapperConfiguration.generatedResourceDirectory.get().resolve(relativeFile)
 
             if (asset.file.isDirectory) {
                 outputFile.mkdirs()

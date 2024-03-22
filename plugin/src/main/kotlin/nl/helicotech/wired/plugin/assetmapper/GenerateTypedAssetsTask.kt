@@ -1,9 +1,9 @@
 package nl.helicotech.wired.plugin.assetmapper
 
 import nl.helicotech.wired.assetmapper.AssetResolver
-import nl.helicotech.wired.assetmapper.CodeGenerator
 import nl.helicotech.wired.plugin.WiredExtension
 import nl.helicotech.wired.plugin.WiredPlugin
+import nl.helicotech.wired.plugin.assetmapper.codegen.TypedAssetGenerator
 import nl.helicotech.wired.plugin.vendors.DownloadVendorsTask
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -11,7 +11,6 @@ import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
-import org.gradle.language.jvm.tasks.ProcessResources
 import java.io.File
 import java.util.*
 import javax.inject.Inject
@@ -41,9 +40,12 @@ abstract class GenerateTypedAssetsTask @Inject constructor(
     @TaskAction
     fun run() {
         require(extension.assetMapperConfiguration.packageName.isPresent) { "packageName is required" }
+
         extension.assetMapperConfiguration.assetDirectories.forEach { directory ->
             generateTypedAsset(directory)
         }
+
+
     }
 
 
@@ -59,16 +61,13 @@ abstract class GenerateTypedAssetsTask @Inject constructor(
 
         val rootAsset = resolver.resolve(project.projectDir.resolve(directory))
 
-        val rootDirectory = extension.assetMapperConfiguration.generatedResourceDirectory.get()
-
         val rootObjectName = directory.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 
         val outputFile = extension.assetMapperConfiguration.generatedSourceDirectory.get().resolve("$rootObjectName.kt")
 
-        val generator = CodeGenerator(
+        val generator = TypedAssetGenerator(
             rootAsset = rootAsset,
-            rootDirectoryOverride = rootDirectory.relativeTo(extension.generatedResourcesDirectory.get()),
-            rootObjectNameOverride = rootObjectName
+            rootDirectoryOverride = File(rootAsset.file.name)
         )
 
         val source = generator.generateString(

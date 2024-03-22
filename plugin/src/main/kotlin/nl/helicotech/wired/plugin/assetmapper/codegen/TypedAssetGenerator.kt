@@ -1,13 +1,14 @@
-package nl.helicotech.wired.assetmapper
+package nl.helicotech.wired.plugin.assetmapper.codegen
 
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import nl.helicotech.wired.assetmapper.Asset
 import java.io.File
+import java.util.*
 
-class CodeGenerator(
+class TypedAssetGenerator(
     val rootAsset: Asset.Directory,
     val rootDirectoryOverride: File? = null,
-    val rootObjectNameOverride: String? = null,
     val types: Types = Types.DEFAULT,
 ) {
 
@@ -76,7 +77,6 @@ class CodeGenerator(
     private fun TypeSpec.Builder.implementAssetDirectory(assetDirectory: Asset.Directory) {
         addSuperinterface(assetDirectoryClassName)
 
-        addProperty(nameProperty(assetDirectory))
         addProperty(fileProperty(assetDirectory))
         addProperty(directoriesProperty(assetDirectory))
         addProperty(filesProperty(assetDirectory))
@@ -86,7 +86,7 @@ class CodeGenerator(
         val builder = PropertySpec.builder(
             name = "directories",
             type = List::class.asClassName().parameterizedBy(assetDirectoryClassName),
-            modifiers = setOf(KModifier.PUBLIC, KModifier.OVERRIDE)
+            modifiers = setOf(KModifier.OVERRIDE)
         ).initializer(
             format = "listOf(%L)",
             assetDirectory.directories.joinToString(separator = ", ") { nameAllocator.get(it.file) }
@@ -99,7 +99,7 @@ class CodeGenerator(
         val builder = PropertySpec.builder(
             name = "files",
             type = List::class.asClassName().parameterizedBy(assetFileClassName),
-            modifiers = setOf(KModifier.PUBLIC, KModifier.OVERRIDE)
+            modifiers = setOf(KModifier.OVERRIDE)
         ).initializer(
             format = "listOf(%L)",
             assetDirectory.files.joinToString(separator = ", ") { nameAllocator.get(it.file) }
@@ -111,31 +111,22 @@ class CodeGenerator(
     private fun TypeSpec.Builder.implementAssetFile(assetFile: Asset.File) {
         addSuperinterface(assetFileClassName)
 
-        addProperty(nameProperty(assetFile))
         addProperty(fileProperty(assetFile))
         addProperty(hashProperty(assetFile))
     }
 
-    private fun nameProperty(asset: Asset): PropertySpec {
-        val builder = PropertySpec.builder(
-            name = "name",
-            type = String::class,
-            modifiers = setOf(KModifier.PUBLIC, KModifier.OVERRIDE)
-        ).initializer("%S", asset.name)
-
-        return builder.build()
-    }
-
     private fun fileProperty(asset: Asset): PropertySpec {
+
         val file = when (asset.file) {
             rootAsset.file -> rootDirectoryOverride ?: asset.file
-            else -> asset.file.relativeTo(rootAsset.file)
+            else ->
+                (rootDirectoryOverride?: rootAsset.file.parentFile).resolve(asset.file.relativeTo(rootAsset.file))
         }
 
         val builder = PropertySpec.builder(
             name = "file",
             type = File::class,
-            modifiers = setOf(KModifier.PUBLIC, KModifier.OVERRIDE)
+            modifiers = setOf(KModifier.OVERRIDE)
         ).initializer(
             format = "%T(%S)",
             File::class,
@@ -149,17 +140,19 @@ class CodeGenerator(
         val builder = PropertySpec.builder(
             name = "hash",
             type = String::class,
-            modifiers = setOf(KModifier.PUBLIC, KModifier.OVERRIDE)
+            modifiers = setOf(KModifier.OVERRIDE)
         ).initializer("%S", asset.hash)
 
         return builder.build()
     }
 
     private fun assetName(asset: Asset): String {
-        val name = when (asset) {
-            rootAsset -> rootObjectNameOverride ?: asset.file.name
+        val canonicalName = when {
+            asset.file.name.startsWith("@") -> asset.file.name.substring(1)
             else -> asset.file.name
         }
-        return nameAllocator.newName(name, asset.file)
+
+        val camelCase = canonicalName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+        return nameAllocator.newName(camelCase, asset.file)
     }
 }
