@@ -1,5 +1,6 @@
 package nl.helicotech.wired.assetmapper
 
+import io.ktor.http.*
 import java.io.File
 
 sealed interface Asset {
@@ -13,6 +14,7 @@ sealed interface Asset {
 
     interface File : Asset {
         val hash: String
+        val contentType: ContentType
     }
 }
 
@@ -39,6 +41,7 @@ fun assetFile(
     return object : Asset.File {
         override val hash = hash
         override val file = file
+        override val contentType = ContentType.defaultForFile(file)
     }
 }
 
@@ -64,3 +67,7 @@ fun Asset.File.hashedFile(): File = file.parentFile.resolve(hashedName())
 fun Asset.File.importMapKey(): String = file.parentFile.resolve(file.nameWithoutExtension).path
 
 fun Asset.File.importMapValue(): String = "/${hashedFile().path}"
+
+fun Asset.ofType(contentType: ContentType): Sequence<Asset.File> = traverseFiles().filter { it.contentType.match(contentType) }
+
+fun Iterable<Asset>.ofType(contentType: ContentType): Sequence<Asset.File> = traverseFiles().filter { it.contentType.match(contentType) }

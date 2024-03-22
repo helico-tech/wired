@@ -10,6 +10,7 @@ kotlin-poet = "1.11.0"
 kotest = "5.8.1"
 
 [libraries]
+ktor-http = { group = "io.ktor", name = "ktor-http-jvm", version.ref = "ktor" }
 ktor-server-core = { group = "io.ktor", name = "ktor-server-core-jvm", version.ref = "ktor" }
 ktor-server-netty = { group = "io.ktor", name = "ktor-server-netty-jvm", version.ref = "ktor" }
 ktor-server-tests = { group = "io.ktor", name = "ktor-server-tests-jvm", version.ref = "ktor" }

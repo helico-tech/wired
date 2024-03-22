@@ -2,6 +2,7 @@ package nl.helicotech.wired.plugin.assetmapper.codegen
 
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import io.ktor.http.*
 import nl.helicotech.wired.assetmapper.Asset
 import java.io.File
 import java.util.*
@@ -113,6 +114,7 @@ class TypedAssetGenerator(
 
         addProperty(fileProperty(assetFile))
         addProperty(hashProperty(assetFile))
+        addProperty(contentTypeProperty(assetFile))
     }
 
     private fun fileProperty(asset: Asset): PropertySpec {
@@ -132,6 +134,19 @@ class TypedAssetGenerator(
             File::class,
             file
         )
+
+        return builder.build()
+    }
+
+    private fun contentTypeProperty(asset: Asset.File): PropertySpec {
+
+        val contentType = ContentType.defaultForFile(asset.file)
+
+        val builder = PropertySpec.builder(
+            name = "contentType",
+            type = ContentType::class,
+            modifiers = setOf(KModifier.OVERRIDE)
+        ).initializer("%T(%S, %S)", ContentType::class, contentType.contentType, contentType.contentSubtype)
 
         return builder.build()
     }
