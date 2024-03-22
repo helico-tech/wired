@@ -1,4 +1,4 @@
-group = "nl.helicotech.wired.gradle-plugin"
+group = "nl.helicotech.wired"
 
 repositories {
     gradlePluginPortal()

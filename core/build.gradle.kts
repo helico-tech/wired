@@ -2,7 +2,7 @@ allprojects {
     repositories {
         mavenCentral()
     }
-    version = "0.0.1"
+    version = "0.1.0"
     group = "nl.helicotech.wired.core"
 }
 
