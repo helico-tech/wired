@@ -3,9 +3,6 @@ package nl.helicotech.wired.plugin.vendors
 import kotlinx.coroutines.runBlocking
 import nl.helicotech.wired.plugin.WiredExtension
 import nl.helicotech.wired.plugin.WiredPlugin
-import nl.helicotech.wired.vendors.JsDelivrVendorDownloader
-import nl.helicotech.wired.vendors.Vendor
-import nl.helicotech.wired.vendors.VendorDownloader
 import org.gradle.api.DefaultTask
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.provider.Property

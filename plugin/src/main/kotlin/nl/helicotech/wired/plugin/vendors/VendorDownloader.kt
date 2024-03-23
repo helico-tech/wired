@@ -1,4 +1,4 @@
-package nl.helicotech.wired.vendors
+package nl.helicotech.wired.plugin.vendors
 
 import io.ktor.http.*
 

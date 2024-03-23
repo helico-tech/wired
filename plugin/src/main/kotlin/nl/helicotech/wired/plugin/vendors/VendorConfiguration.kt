@@ -1,8 +1,6 @@
 package nl.helicotech.wired.plugin.vendors
 
 import nl.helicotech.wired.plugin.WiredExtension
-import nl.helicotech.wired.vendors.Vendor
-import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import java.io.File
 import javax.inject.Inject

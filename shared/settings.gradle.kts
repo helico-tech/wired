@@ -9,4 +9,3 @@ dependencyResolutionManagement {
 }
 
 include("asset-mapper")
-include("vendors")

@@ -1,4 +1,4 @@
-package nl.helicotech.wired.vendors
+package nl.helicotech.wired.plugin.vendors
 
 data class Vendor (
     val packageName: String,

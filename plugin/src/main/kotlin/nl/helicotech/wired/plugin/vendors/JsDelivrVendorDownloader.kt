@@ -1,4 +1,4 @@
-package nl.helicotech.wired.vendors
+package nl.helicotech.wired.plugin.vendors
 
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -10,7 +10,6 @@ import io.ktor.serialization.gson.*
 
 class JsDelivrVendorDownloader(
     private val client: HttpClient,
-    private val apiBaseUrl: String = "https://data.jsdelivr.com/v1",
     private val cdnBaseUrl: String = "https://cdn.jsdelivr.net/npm",
 ) : VendorDownloader {
 

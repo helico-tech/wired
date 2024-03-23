@@ -21,11 +21,16 @@ gradlePlugin {
 
 dependencies {
     implementation("nl.helicotech.wired.shared:asset-mapper")
-    implementation("nl.helicotech.wired.shared:vendors")
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlin.poet)
     implementation(libs.ktor.http)
+
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.gson)
+    implementation(libs.gson)
 
     testImplementation(libs.kotlin.test.junit)
     testImplementation(kotlin("test"))
