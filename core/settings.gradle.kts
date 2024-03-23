@@ -11,3 +11,4 @@ dependencyResolutionManagement {
 includeBuild("../shared")
 
 include("ktor")
+include("kotlinx-html-turbo")

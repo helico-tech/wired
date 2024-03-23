@@ -64,9 +64,9 @@ fun Asset.traverseDirectories(): Sequence<Asset.Directory> = traverse().filterIs
 fun Asset.File.hashedName(): String = "${file.nameWithoutExtension}-${hash}.${file.extension}"
 fun Asset.File.hashedFile(): File = file.parentFile.resolve(hashedName())
 
-fun Asset.File.importMapKey(): String = file.parentFile.resolve(file.nameWithoutExtension).path
+fun Asset.File.url(): String = hashedFile().path
 
-fun Asset.File.importMapValue(): String = "/${hashedFile().path}"
+fun Asset.File.importMapKey(): String = file.parentFile.resolve(file.nameWithoutExtension).path
 
 fun Asset.ofType(contentType: ContentType): Sequence<Asset.File> = traverseFiles().filter { it.contentType.match(contentType) }
 

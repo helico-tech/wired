@@ -5,15 +5,21 @@ import io.ktor.server.engine.*
 import io.ktor.server.html.*
 import io.ktor.server.netty.*
 import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
+import io.ktor.websocket.*
+import kotlinx.coroutines.delay
 import kotlinx.html.*
 import nl.helicotech.wired.assetmapper.fileName
-import nl.helicotech.wired.assetmapper.hashedFile
 import nl.helicotech.wired.assetmapper.traverseFiles
+import nl.helicotech.wired.assetmapper.url
 import nl.helicotech.wired.examples.minimal.assets.Assets
 import nl.helicotech.wired.examples.minimal.assets.Vendors
-import nl.helicotech.wired.ktor.assetmapper.staticTypedAssets
 import nl.helicotech.wired.ktor.assetmapper.importMap
 import nl.helicotech.wired.ktor.assetmapper.module
+import nl.helicotech.wired.ktor.assetmapper.sendHtml
+import nl.helicotech.wired.ktor.assetmapper.staticTypedAssets
+import nl.helicotech.wired.turbo.*
+import java.time.Duration
 
 fun main() {
     embeddedServer(
@@ -25,30 +31,52 @@ fun main() {
 }
 
 fun Application.minimal() {
+    install(WebSockets) {
+        pingPeriod = Duration.ofSeconds(15)
+        timeout = Duration.ofSeconds(15)
+        maxFrameSize = Long.MAX_VALUE
+        masking = false
+    }
+
     routing {
         staticTypedAssets(Assets, Vendors)
 
         get("/") {
-            call.respondHtml {
-                head {
-                    importMap(Assets, Vendors)
-                    module(Assets.Js.My_script_js)
+            call.respondTemplate {
+                turboStreamSource("ws://${call.application.environment.config.host}:${call.application.environment.config.port}/turbo-stream")
+
+                h1 {
+                    +"Wired Example"
                 }
 
-                body {
-                    h1 {
-                        + "Wired Example"
-                    }
+                a(href = "/assets") {
+                    targetTurboFrame("assets")
+                    +"Assets"
+                }
 
-                    h2 { + "Typed assets" }
+                turboFrame("stream") {
+                    h2 { +"Area for stream" }
+                }
 
+                turboFrame("assets") {
+                    h2 { +"Area for assets" }
+                }
+            }
+        }
+
+        get("/assets") {
+            call.respondTemplate {
+                turboFrame("assets") {
+                    h2 { +"Typed assets" }
                     listOf(Assets, Vendors).forEach { directory ->
-                        h3 { + directory.fileName() }
+                        h3 { +directory.fileName() }
 
                         ul {
                             directory.traverseFiles().forEach {
                                 li {
-                                    a(href = it.hashedFile().path) { + it.file.name }
+                                    a(href = it.url()) {
+                                        +it.fileName()
+                                    }
                                 }
                             }
                         }
@@ -56,5 +84,39 @@ fun Application.minimal() {
                 }
             }
         }
+
+        webSocket(path = "/turbo-stream") {
+            while (true) {
+                outgoing.sendHtml {
+                    turboStream(
+                        action = TurboStreamActionType.Replace,
+                        target = "stream"
+                    ) {
+                        turboFrame("stream") {
+                            p { +"Hello, World!" }
+                            p { +"Current time: ${System.currentTimeMillis()}" }
+                        }
+                    }
+                }
+                delay(1000)
+            }
+        }
+    }
+}
+
+suspend fun ApplicationCall.respondTemplate(content: BODY.() -> Unit) {
+    respondHtml {
+        template(content)
+    }
+}
+
+fun HTML.template(content: BODY.() -> Unit) {
+    head {
+        importMap(Assets, Vendors)
+        module(Vendors.Js.Hotwired.Turbo_js)
+    }
+
+    body {
+        content()
     }
 }

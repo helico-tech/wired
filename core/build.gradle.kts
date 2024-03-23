@@ -3,7 +3,7 @@ allprojects {
         mavenCentral()
     }
     version = "0.1.0"
-    group = "nl.helicotech.wired.core"
+    group = "nl.helicotech.wired"
 }
 
 plugins {

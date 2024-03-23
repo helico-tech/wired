@@ -10,6 +10,6 @@ import kotlinx.serialization.json.Json
 data class ImportMap(
     val imports: Map<String, String>,
 ) {
-    constructor(vararg assets: Asset) : this(assets.asIterable().ofType(ContentType.Application.JavaScript).associate { it.importMapKey() to it.importMapValue() })
+    constructor(vararg assets: Asset) : this(assets.asIterable().ofType(ContentType.Application.JavaScript).associate { it.importMapKey() to "/${it.url()}" })
     fun toJson(): String = Json.encodeToString(this)
 }
