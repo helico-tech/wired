@@ -87,3 +87,12 @@ fun <T, C : TagConsumer<T>> C.turboStream(
 ) = TURBOSTREAM(attributesMapOf("action", action.value, "target", target, "targets", targets), this).visitAndFinalize(this) {
     template(block)
 }
+
+fun HTMLTag.turboStream(
+    action: TurboStreamActionType,
+    target: String? = null,
+    targets: String? = null,
+    block: TEMPLATE.() -> Unit
+) = TURBOSTREAM(attributesMapOf("action", action.value, "target", target, "targets", targets), consumer).visitAndFinalize(consumer) {
+    template(block)
+}

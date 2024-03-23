@@ -9,15 +9,11 @@ import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.delay
 import kotlinx.html.*
-import nl.helicotech.wired.assetmapper.fileName
-import nl.helicotech.wired.assetmapper.traverseFiles
-import nl.helicotech.wired.assetmapper.url
+import nl.helicotech.wired.assetmapper.*
 import nl.helicotech.wired.examples.minimal.assets.Assets
 import nl.helicotech.wired.examples.minimal.assets.Vendors
-import nl.helicotech.wired.ktor.assetmapper.importMap
-import nl.helicotech.wired.ktor.assetmapper.module
-import nl.helicotech.wired.ktor.assetmapper.sendHtml
-import nl.helicotech.wired.ktor.assetmapper.staticTypedAssets
+import nl.helicotech.wired.ktor.sendHtml
+import nl.helicotech.wired.ktor.sendHtmlFragment
 import nl.helicotech.wired.turbo.*
 import java.time.Duration
 
@@ -87,7 +83,7 @@ fun Application.minimal() {
 
         webSocket(path = "/turbo-stream") {
             while (true) {
-                outgoing.sendHtml {
+                outgoing.sendHtmlFragment {
                     turboStream(
                         action = TurboStreamActionType.Replace,
                         target = "stream"

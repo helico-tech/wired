@@ -1,4 +1,4 @@
-package nl.helicotech.wired.ktor.assetmapper
+package nl.helicotech.wired.assetmapper
 
 import kotlinx.html.HtmlHeadTag
 import kotlinx.html.script
