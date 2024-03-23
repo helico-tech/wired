@@ -53,7 +53,7 @@ fun Application.minimal() {
                     targetTurboFrame("assets")
                     +"Assets"
                 }
-                
+
                 turboFrame("stream") {
                     h2 { +"Area for stream" }
                 }
@@ -89,11 +89,13 @@ fun Application.minimal() {
             while (true) {
                 outgoing.sendHtml {
                     turboStream(
-                        action = TurboStreamActionType.Append,
+                        action = TurboStreamActionType.Replace,
                         target = "stream"
                     ) {
-                        p { +"Hello, World!" }
-                        p { +"Current time: ${System.currentTimeMillis()}" }
+                        turboFrame("stream") {
+                            p { +"Hello, World!" }
+                            p { +"Current time: ${System.currentTimeMillis()}" }
+                        }
                     }
                 }
                 delay(1000)

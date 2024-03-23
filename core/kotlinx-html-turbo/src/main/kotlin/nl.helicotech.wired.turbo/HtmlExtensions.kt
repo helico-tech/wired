@@ -33,7 +33,7 @@ sealed class TurboStreamActionType(val value: String) {
     data object Remove : TurboStreamActionType("remove")
     data object Before : TurboStreamActionType("before")
     data object After : TurboStreamActionType("after")
-    data object Morph : TurboStreamActionType("morph")
+    //data object Morph : TurboStreamActionType("morph")
     data object Refresh : TurboStreamActionType("refresh")
 }
 
