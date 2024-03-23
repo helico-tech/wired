@@ -39,13 +39,11 @@ abstract class GenerateTypedAssetsTask @Inject constructor(
 
     @TaskAction
     fun run() {
-        require(extension.assetMapperConfiguration.packageName.isPresent) { "packageName is required" }
+        //require(extension.assetMapperConfiguration.packageName.isPresent) { "packageName is required" }
 
-        extension.assetMapperConfiguration.assetDirectories.forEach { directory ->
+        /*extension.assetMapperConfiguration.assetDirectories.forEach { directory ->
             generateTypedAsset(directory)
-        }
-
-
+        }*/
     }
 
 
@@ -57,7 +55,7 @@ abstract class GenerateTypedAssetsTask @Inject constructor(
     }
 
     private fun generateTypedAsset(directory: File) {
-        logger.lifecycle("Generating typed assets for {}", directory)
+        /*logger.lifecycle("Generating typed assets for {}", directory)
 
         val rootAsset = resolver.resolve(project.projectDir.resolve(directory))
 
@@ -79,6 +77,6 @@ abstract class GenerateTypedAssetsTask @Inject constructor(
             outputFile.parentFile.mkdirs()
         }
 
-        outputFile.writeText(source)
+        outputFile.writeText(source)*/
     }
 }

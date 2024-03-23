@@ -13,8 +13,8 @@ wired {
     }
 
     vendors {
-        include("@hotwired/turbo", "8.0.4")
-        include("@hotwired/stimulus", "3.2.2")
+        add("@hotwired/turbo", "8.0.4")
+        add("@hotwired/stimulus", "3.2.2")
     }
 }
 

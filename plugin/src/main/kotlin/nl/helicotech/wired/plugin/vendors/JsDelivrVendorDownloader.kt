@@ -24,12 +24,12 @@ class JsDelivrVendorDownloader(
         }
     }
 
-    override suspend fun download(vendor: Vendor): VendorDownloader.DownloadResult {
-        val url = "$cdnBaseUrl/${vendor.packageName}@${vendor.version}/+esm"
+    override suspend fun download(packageName: String, version: String): VendorDownloader.DownloadResult {
+        val url = "$cdnBaseUrl/${packageName}@${version}/+esm"
         val response = client.get(url)
 
         if (response.status != HttpStatusCode.OK) {
-            throw Exception("Failed to download ESM for ${vendor.packageName}@${vendor.version}")
+            throw Exception("Failed to download ESM for ${packageName}@${version}")
         }
 
         return VendorDownloader.DownloadResult(

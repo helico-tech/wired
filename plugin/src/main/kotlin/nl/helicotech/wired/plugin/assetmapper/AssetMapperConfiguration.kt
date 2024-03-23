@@ -25,8 +25,8 @@ abstract class AssetMapperConfigurationImpl @Inject constructor(
     override val assetDirectories = mutableSetOf<File>()
 
     init {
-        generatedSourceDirectory.convention(extension.generatedSourceDirectory.get().resolve("asset-mapper"))
-        generatedResourceDirectory.convention(extension.generatedResourcesDirectory.get().resolve("asset-mapper"))
+        //generatedSourceDirectory.convention(extension.generatedSourceDirectory.get().resolve("asset-mapper"))
+        //generatedResourceDirectory.convention(extension.generatedResourcesDirectory.get().resolve("asset-mapper"))
     }
 
     override fun include(directory: File) {

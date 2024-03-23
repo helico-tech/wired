@@ -48,22 +48,22 @@ abstract class TransformAssetsTask @Inject constructor(
     }
 
     fun removeResourcesFromProcessResourcesTask() {
-        val assetDirectories = extension.assetMapperConfiguration.assetDirectories.map { project.file(it) }
+        /*val assetDirectories = extension.assetMapperConfiguration.assetDirectories.map { project.file(it) }
         project.tasks.withType(ProcessResources::class.java).forEach {
             it.exclude {
                 assetDirectories.any { assetDirectory -> it.file.canonicalPath.startsWith(assetDirectory.canonicalPath) }
             }
-        }
+        }*/
     }
 
     private fun transformAssets() {
-        extension.assetMapperConfiguration.assetDirectories.forEach { directory ->
+        /*extension.assetMapperConfiguration.assetDirectories.forEach { directory ->
             transformAsset(directory)
-        }
+        }*/
     }
 
     private fun transformAsset(directory: File) {
-        val rootDirectory = project.projectDir.resolve(directory)
+        /*val rootDirectory = project.projectDir.resolve(directory)
         val rootAsset = resolver.resolve(rootDirectory)
 
         rootAsset.traverseFiles().forEach { asset ->
@@ -76,6 +76,6 @@ abstract class TransformAssetsTask @Inject constructor(
             } else {
                 asset.file.copyTo(outputFile, overwrite = true)
             }
-        }
+        }*/
     }
 }

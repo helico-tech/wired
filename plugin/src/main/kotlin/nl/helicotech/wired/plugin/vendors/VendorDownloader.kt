@@ -10,5 +10,5 @@ interface VendorDownloader {
         fun fileExtensions() = contentType.fileExtensions()
     }
 
-    suspend fun download(vendor: Vendor): DownloadResult
+    suspend fun download(packageName: String, version: String): DownloadResult
 }
