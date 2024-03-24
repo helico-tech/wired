@@ -8,8 +8,8 @@ wired {
     assetMapper {
         packageName.set("nl.helicotech.wired.examples.minimal.assets")
 
-        include("src/main/resources/assets")
-        include("build/wired/vendors")
+        add("src/main/resources/assets")
+        add("build/wired/vendors")
     }
 
     vendors {

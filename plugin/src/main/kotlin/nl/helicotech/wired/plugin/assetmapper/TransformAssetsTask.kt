@@ -8,6 +8,7 @@ import nl.helicotech.wired.plugin.WiredExtension
 import nl.helicotech.wired.plugin.WiredPlugin
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
@@ -30,10 +31,14 @@ abstract class TransformAssetsTask @Inject constructor(
         description = DESCRIPTION
 
         this.dependsOn(GenerateTypedAssetsTask.NAME)
+
         project.tasks.withType(ProcessResources::class.java).forEach {
             it.dependsOn(this)
         }
     }
+
+    @get:OutputFiles
+    val outputFiles = mutableListOf<File>()
 
     private val resolver = AssetResolver()
 
@@ -48,34 +53,37 @@ abstract class TransformAssetsTask @Inject constructor(
     }
 
     fun removeResourcesFromProcessResourcesTask() {
-        /*val assetDirectories = extension.assetMapperConfiguration.assetDirectories.map { project.file(it) }
+        val assetDirectories = extension.assetMapperConfiguration.assetDirectories.get().map { project.file(it) }
         project.tasks.withType(ProcessResources::class.java).forEach {
             it.exclude {
                 assetDirectories.any { assetDirectory -> it.file.canonicalPath.startsWith(assetDirectory.canonicalPath) }
             }
-        }*/
+        }
     }
 
     private fun transformAssets() {
-        /*extension.assetMapperConfiguration.assetDirectories.forEach { directory ->
+        extension.assetMapperConfiguration.generatedResourceDirectory.get().asFile.listFiles()?.forEach { it.deleteRecursively() }
+
+        extension.assetMapperConfiguration.assetDirectories.get().forEach { directory ->
             transformAsset(directory)
-        }*/
+        }
     }
 
     private fun transformAsset(directory: File) {
-        /*val rootDirectory = project.projectDir.resolve(directory)
+        val rootDirectory = project.projectDir.resolve(directory)
         val rootAsset = resolver.resolve(rootDirectory)
 
         rootAsset.traverseFiles().forEach { asset ->
 
             val relativeFile = asset.hashedFile().relativeTo(rootDirectory.parentFile)
-            val outputFile = extension.assetMapperConfiguration.generatedResourceDirectory.get().resolve(relativeFile)
+            val outputFile = extension.assetMapperConfiguration.generatedResourceDirectory.get().file(relativeFile.path).asFile
 
             if (asset.file.isDirectory) {
                 outputFile.mkdirs()
             } else {
                 asset.file.copyTo(outputFile, overwrite = true)
+                outputFiles.add(outputFile)
             }
-        }*/
+        }
     }
 }

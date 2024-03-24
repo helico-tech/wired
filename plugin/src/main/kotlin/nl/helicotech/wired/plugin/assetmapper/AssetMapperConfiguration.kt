@@ -1,35 +1,52 @@
 package nl.helicotech.wired.plugin.assetmapper
 
+import nl.helicotech.wired.assetmapper.AssetResolver
 import nl.helicotech.wired.plugin.WiredExtension
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import java.io.File
 import javax.inject.Inject
 
-interface AssetMapperConfiguration {
 
-    val packageName: Property<String>
-    val generatedSourceDirectory: Property<File>
-    val generatedResourceDirectory: Property<File>
+abstract class AssetMapperConfiguration @Inject constructor(
+    project: Project,
+    extension: WiredExtension
+)  {
 
-    val assetDirectories: Set<File>
-    fun include(directory: File)
-    fun include(directory: String) = include(File(directory))
-}
+    @get:Input
+    abstract val packageName: Property<String>
 
-abstract class AssetMapperConfigurationImpl @Inject constructor(
-    private val project: Project,
-    private val extension: WiredExtension
-) : AssetMapperConfiguration {
+    @get:InputFiles
+    abstract val assetDirectories: SetProperty<File>
 
-    override val assetDirectories = mutableSetOf<File>()
+    @get:InputDirectory
+    abstract val generatedSourceDirectory: DirectoryProperty
+
+    @get:InputDirectory
+    abstract val generatedResourceDirectory: DirectoryProperty
 
     init {
-        //generatedSourceDirectory.convention(extension.generatedSourceDirectory.get().resolve("asset-mapper"))
-        //generatedResourceDirectory.convention(extension.generatedResourcesDirectory.get().resolve("asset-mapper"))
+        val sourceDir = extension.generatedSourceDirectory.get().dir("asset-mapper")
+        val resourceDir = extension.generatedResourcesDirectory.get().dir("asset-mapper")
+
+        sourceDir.asFile.mkdirs()
+        resourceDir.asFile.mkdirs()
+
+        generatedSourceDirectory.convention(sourceDir)
+        generatedResourceDirectory.convention(resourceDir)
     }
 
-    override fun include(directory: File) {
+    fun add(directory: File) {
         assetDirectories.add(directory)
+    }
+
+    fun add(directory: String) {
+        assetDirectories.add(File(directory))
     }
 }

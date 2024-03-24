@@ -45,14 +45,14 @@ abstract class DownloadVendorsTask @Inject constructor(
     }
 
     private fun clearVendors() {
-        logger.lifecycle("Clearing vendor dependencies")
+        logger.info("Clearing vendor dependencies")
         if (configuration.get().downloadDirectory.get().asFile.exists()) {
             configuration.get().downloadDirectory.get().asFile.deleteRecursively()
         }
     }
 
     private suspend fun downloadVendors() {
-        logger.lifecycle("Downloading vendor dependencies")
+        logger.info("Downloading vendor dependencies")
         val vendors = configuration.get().vendors
 
         vendors.get().forEach { (packageName, version) ->
@@ -61,7 +61,7 @@ abstract class DownloadVendorsTask @Inject constructor(
     }
 
     private suspend fun downloadVendorDependency(packageName: String, version: String) {
-        logger.lifecycle("Downloading: ${packageName}@${version}")
+        logger.info("Downloading: ${packageName}@${version}")
 
         val downloadDirectory = configuration.get().downloadDirectory.get()
 

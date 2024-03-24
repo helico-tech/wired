@@ -22,18 +22,18 @@ abstract class WiredPlugin: Plugin<Project> {
         )
 
         registerVendorDownloadTask(target, extension)
-        //val generateTypedAssetsTask = registerGenerateTypedAssetsTask(target, extension)
-        //val transformAssetsTask = registerTransformAssetsTask(target, extension)
+        val generateTypedAssetsTask = registerGenerateTypedAssetsTask(target, extension)
+        val transformAssetsTask = registerTransformAssetsTask(target, extension)
 
         afterEvaluate {
-            /*generateTypedAssetsTask.get().apply {
+            generateTypedAssetsTask.get().apply {
                 registerSourceSet()
             }
 
             transformAssetsTask.get().apply {
                 removeResourcesFromProcessResourcesTask()
                 registerResources()
-            }*/
+            }
         }
     }
 

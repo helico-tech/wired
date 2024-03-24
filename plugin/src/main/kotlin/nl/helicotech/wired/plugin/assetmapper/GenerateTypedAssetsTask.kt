@@ -1,5 +1,6 @@
 package nl.helicotech.wired.plugin.assetmapper
 
+import nl.helicotech.wired.assetmapper.Asset
 import nl.helicotech.wired.assetmapper.AssetResolver
 import nl.helicotech.wired.plugin.WiredExtension
 import nl.helicotech.wired.plugin.WiredPlugin
@@ -8,6 +9,9 @@ import nl.helicotech.wired.plugin.vendors.DownloadVendorsTask
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.SourceDirectorySet
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Nested
+import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
@@ -26,24 +30,34 @@ abstract class GenerateTypedAssetsTask @Inject constructor(
         val DESCRIPTION = "Generate typed assets"
     }
 
+    @get:Nested
+    abstract val configuration: Property<AssetMapperConfiguration>
+
+    @get:OutputFiles
+    val outputFiles = mutableListOf<File>()
+
     private val resolver = AssetResolver()
 
     init {
         group = WiredPlugin.GROUP
         description = DESCRIPTION
 
-        this.dependsOn(DownloadVendorsTask.NAME)
+        configuration.convention(extension.assetMapperConfiguration)
+
+        dependsOn(DownloadVendorsTask.NAME)
 
         project.tasks.getByName("compileKotlin").dependsOn(this)
     }
 
     @TaskAction
     fun run() {
-        //require(extension.assetMapperConfiguration.packageName.isPresent) { "packageName is required" }
+        require(extension.assetMapperConfiguration.packageName.isPresent) { "packageName is required" }
 
-        /*extension.assetMapperConfiguration.assetDirectories.forEach { directory ->
+        extension.assetMapperConfiguration.generatedSourceDirectory.get().asFile.listFiles()?.forEach { it.deleteRecursively() }
+
+        extension.assetMapperConfiguration.assetDirectories.get().forEach { directory ->
             generateTypedAsset(directory)
-        }*/
+        }
     }
 
 
@@ -55,13 +69,13 @@ abstract class GenerateTypedAssetsTask @Inject constructor(
     }
 
     private fun generateTypedAsset(directory: File) {
-        /*logger.lifecycle("Generating typed assets for {}", directory)
+        logger.info("Generating typed assets for {}", directory)
 
         val rootAsset = resolver.resolve(project.projectDir.resolve(directory))
 
         val rootObjectName = directory.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 
-        val outputFile = extension.assetMapperConfiguration.generatedSourceDirectory.get().resolve("$rootObjectName.kt")
+        val outputFile = extension.assetMapperConfiguration.generatedSourceDirectory.get().dir("$rootObjectName.kt").asFile
 
         val generator = TypedAssetGenerator(
             rootAsset = rootAsset,
@@ -77,6 +91,8 @@ abstract class GenerateTypedAssetsTask @Inject constructor(
             outputFile.parentFile.mkdirs()
         }
 
-        outputFile.writeText(source)*/
+        outputFile.writeText(source)
+
+        outputFiles.add(outputFile)
     }
 }

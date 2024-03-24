@@ -11,32 +11,6 @@ import org.gradle.api.tasks.OutputDirectory
 import java.io.File
 import javax.inject.Inject
 
-/*interface VendorConfiguration {
-    companion object {
-        val DEFAULT_VENDOR_DIRECTORY = "vendors"
-    }
-
-    val downloadDirectory: OutputDirectory
-
-    val vendors : Set<Vendor>
-    fun include(vendor: Vendor)
-    fun include(packageName: String, version: String) = include(Vendor(packageName, version))
-}
-
-abstract class VendorConfigurationImpl @Inject constructor(
-    extension: WiredExtension
-): VendorConfiguration {
-    init {
-        //downloadDirectory.convention(extension.buildDirectory.get().resolve(VendorConfiguration.DEFAULT_VENDOR_DIRECTORY))
-        downloadDirectory.
-    }
-
-    override val vendors = mutableSetOf<Vendor>()
-    override fun include(vendor: Vendor) {
-        vendors.add(vendor)
-    }
-}*/
-
 abstract class VendorConfiguration @Inject constructor(
     extension: WiredExtension
 ) {

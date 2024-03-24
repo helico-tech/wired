@@ -21,6 +21,7 @@ abstract class WiredExtension @Inject constructor(
     abstract val generatedResourcesDirectory : DirectoryProperty
 
     val vendorConfiguration : VendorConfiguration by lazy { objectFactory.newInstance(VendorConfiguration::class.java, this) }
+    val assetMapperConfiguration : AssetMapperConfiguration by lazy { objectFactory.newInstance(AssetMapperConfiguration::class.java, this) }
 
     init {
         buildDirectory.convention(project.layout.buildDirectory.dir(NAME))
@@ -30,7 +31,7 @@ abstract class WiredExtension @Inject constructor(
     }
 
     fun assetMapper(action: AssetMapperConfiguration.() -> Unit) {
-        //assetMapperConfiguration.action()
+        assetMapperConfiguration.action()
     }
 
     fun vendors(action: VendorConfiguration.() -> Unit) {
