@@ -1,11 +1,11 @@
 package nl.helicotech.wired.plugin.assetmapper
 
-import nl.helicotech.wired.assetmapper.AssetResolver
-import nl.helicotech.wired.assetmapper.hashedFile
-import nl.helicotech.wired.assetmapper.hashedName
-import nl.helicotech.wired.assetmapper.traverseFiles
+import nl.helicotech.wired.assetmapper.*
 import nl.helicotech.wired.plugin.WiredExtension
 import nl.helicotech.wired.plugin.WiredPlugin
+import nl.helicotech.wired.plugin.assetmapper.transformer.CssTransformer
+import nl.helicotech.wired.plugin.assetmapper.transformer.Transformer
+import nl.helicotech.wired.plugin.assetmapper.transformer.UnitTransformer
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.OutputFiles
@@ -42,8 +42,16 @@ abstract class TransformAssetsTask @Inject constructor(
 
     private val resolver = AssetResolver()
 
+    private val assets = mutableListOf<Asset.Directory>()
+
+    private val transformers = mutableListOf(
+        CssTransformer(assets),
+        UnitTransformer(),
+    )
+
     @TaskAction
     fun run() {
+        resolveAssets()
         transformAssets()
     }
 
@@ -61,29 +69,34 @@ abstract class TransformAssetsTask @Inject constructor(
         }
     }
 
-    private fun transformAssets() {
-        extension.assetMapperConfiguration.generatedResourceDirectory.get().asFile.listFiles()?.forEach { it.deleteRecursively() }
-
+    private fun resolveAssets() {
         extension.assetMapperConfiguration.assetDirectories.get().forEach { directory ->
-            transformAsset(directory)
+            val rootDirectory = project.projectDir.resolve(directory)
+            val rootAsset = resolver.resolve(rootDirectory)
+
+            assets.add(rootAsset)
         }
     }
 
-    private fun transformAsset(directory: File) {
-        val rootDirectory = project.projectDir.resolve(directory)
-        val rootAsset = resolver.resolve(rootDirectory)
+    private fun transformAssets() {
+        assets.forEach { asset ->
+            transformAsset(asset)
+        }
+    }
+
+    private fun transformAsset(rootAsset: Asset.Directory) {
+        val rootDirectory = project.projectDir.resolve(rootAsset.file)
 
         rootAsset.traverseFiles().forEach { asset ->
+            val transformer = transformers.firstOrNull { it.accepts(asset) } ?: throw IllegalStateException("No transformer found for asset: $asset")
 
             val relativeFile = asset.hashedFile().relativeTo(rootDirectory.parentFile)
             val outputFile = extension.assetMapperConfiguration.generatedResourceDirectory.get().file(relativeFile.path).asFile
 
-            if (asset.file.isDirectory) {
-                outputFile.mkdirs()
-            } else {
-                asset.file.copyTo(outputFile, overwrite = true)
-                outputFiles.add(outputFile)
-            }
+            outputFile.parentFile.mkdirs()
+            outputFile.createNewFile()
+            outputFile.writeText(transformer.transform(asset))
+            outputFiles.add(outputFile)
         }
     }
 }
