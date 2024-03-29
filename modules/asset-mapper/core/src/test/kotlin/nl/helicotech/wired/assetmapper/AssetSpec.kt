@@ -10,7 +10,18 @@ class AssetSpec : DescribeSpec({
             val asset = Asset(
                 sourceFile = File("src/test/resources/test-assets/text-asset.txt"),
                 targetFile = File("/assets/text-asset.txt"),
-                digest = "123456"
+                digest = "123456",
+                moduleName = null
+            )
+            asset.mappedFile shouldBe File("/assets/text-asset-123456.txt")
+        }
+
+        it("should have a mapped file with a module") {
+            val asset = Asset(
+                sourceFile = File("src/test/resources/test-assets/text-asset.txt"),
+                targetFile = File("/assets/text-asset.txt"),
+                digest = "123456",
+                moduleName = "module"
             )
             asset.mappedFile shouldBe File("/assets/text-asset-123456.txt")
         }

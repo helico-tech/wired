@@ -5,7 +5,8 @@ import java.io.File
 data class Asset(
     val sourceFile: File,
     val targetFile: File,
-    val digest: String
+    val digest: String,
+    val moduleName: String?
 ) {
     val mappedFile = File(targetFile.parent, "${targetFile.nameWithoutExtension}-${digest}.${targetFile.extension}")
 }
