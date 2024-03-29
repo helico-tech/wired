@@ -66,6 +66,7 @@ class AssetManagerSpec : DescribeSpec({
                 assetManager.assets.size shouldBe 1
                 assetManager.assets.first().sourceFile shouldBe assetFile
                 assetManager.assets.first().targetFile shouldBe File("/assets/text-asset.txt")
+                assetManager.assets.first().digest shouldBe "da39a3ee5e6b4b0d3255bfef95601890afd80709"
             }
 
             it("should add multiple assets with different target files") {

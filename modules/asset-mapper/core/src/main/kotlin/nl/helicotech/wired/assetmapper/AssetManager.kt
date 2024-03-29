@@ -5,7 +5,11 @@ import java.io.File
 interface AssetManager {
 
     companion object {
-        operator fun invoke(): AssetManager = AssetManagerImpl()
+        operator fun invoke(
+            digester: Digester = Digester.SHA1
+        ): AssetManager = AssetManagerImpl(
+            digester = digester
+        )
     }
 
     val assets: Set<Asset>
@@ -13,7 +17,9 @@ interface AssetManager {
     fun addAsset(file: File, mountPath: String = "/assets")
 }
 
-class AssetManagerImpl : AssetManager {
+class AssetManagerImpl(
+    private val digester: Digester = Digester.SHA1
+) : AssetManager {
     override val assets = mutableSetOf<Asset>()
 
     override fun addAsset(file: File, mountPath: String) {
@@ -23,9 +29,14 @@ class AssetManagerImpl : AssetManager {
         require(assets.none { it.sourceFile == file }) { "Asset file is already added: $file" }
         require(mountPath.startsWith("/")) { "Mount path must start with a /: $mountPath" }
 
-        val targetFile = File(mountPath, file.name)
+        val asset = Asset(
+            sourceFile = file,
+            targetFile = File(mountPath, file.name),
+            digest = digester.digest(file.inputStream())
+        )
 
-        require(assets.none { it.targetFile == targetFile }) { "Target file is already in use: $targetFile" }
-        this.assets.add(Asset(file, targetFile))
+        require(assets.none { it.targetFile == asset.targetFile }) { "Target file is already in use: ${asset.targetFile}" }
+
+        assets.add(asset)
     }
 }

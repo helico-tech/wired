@@ -4,5 +4,6 @@ import java.io.File
 
 data class Asset(
     val sourceFile: File,
-    val targetFile: File
+    val targetFile: File,
+    val digest: String
 )
