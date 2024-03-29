@@ -22,14 +22,17 @@ interface AssetManager {
 
     fun resolveRelative(from: Asset, path: String): Asset? {
         require(assets.contains(from)) { "Asset is not managed: $from" }
+
         return assets.find {
-            it.targetFile.path == from.targetFile.parentFile.resolve(path).canonicalPath
+            it.targetFile == from.targetFile.parentFile.resolve(path).canonicalFile
         }
     }
 
     fun resolveRelative(from: String, path: String): Asset? {
         val fromAsset = resolve(from)
+
         requireNotNull(fromAsset) { "Asset is not managed: $from" }
+
         return resolveRelative(fromAsset, path)
     }
 }
