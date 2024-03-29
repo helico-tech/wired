@@ -14,11 +14,7 @@ interface AssetManager {
 
     val assets: Set<Asset>
 
-    fun addAsset(
-        file: File,
-        mountPath: String,
-        module: String?
-    )
+    fun addAsset(file: File, mountPath: String, module: String?)
 
     fun resolve(path: String): Asset?
 

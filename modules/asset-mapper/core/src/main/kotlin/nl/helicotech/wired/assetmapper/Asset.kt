@@ -1,5 +1,6 @@
 package nl.helicotech.wired.assetmapper
 
+import io.ktor.http.*
 import java.io.File
 
 data class Asset(
@@ -9,4 +10,5 @@ data class Asset(
     val moduleName: String?
 ) {
     val mappedFile = File(targetFile.parent, "${targetFile.nameWithoutExtension}-${digest}.${targetFile.extension}")
+    val contentType = ContentType.defaultForFile(sourceFile)
 }
