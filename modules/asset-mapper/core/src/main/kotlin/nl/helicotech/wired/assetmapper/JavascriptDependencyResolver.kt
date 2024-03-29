@@ -1,6 +1,7 @@
 package nl.helicotech.wired.assetmapper
 
 import io.ktor.http.*
+import java.io.InputStream
 
 class JavascriptDependencyResolver : DependencyResolver {
 
@@ -19,8 +20,8 @@ class JavascriptDependencyResolver : DependencyResolver {
         return asset.contentType.match(ContentType.Application.JavaScript)
     }
 
-    override fun resolve(source: Collection<String>): Set<String> {
-        return source.fold(mutableSetOf()) { dependencies, line ->
+    override fun resolve(source: InputStream): Set<String> {
+        return source.reader().readLines().fold(mutableSetOf()) { dependencies, line ->
             dependencies.addAll(IMPORT_REGEX.findAll(line).map { it.groupValues[1] }.filterNot { it.isBlank() })
             dependencies
         }
