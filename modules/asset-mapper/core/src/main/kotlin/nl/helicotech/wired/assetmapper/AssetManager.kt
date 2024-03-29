@@ -2,7 +2,8 @@ package nl.helicotech.wired.assetmapper
 
 import java.io.File
 
-interface AssetManager {
+
+interface AssetManager : AssetResolver {
 
     companion object {
         operator fun invoke(
@@ -15,12 +16,6 @@ interface AssetManager {
     val assets: Set<Asset>
 
     fun addAsset(file: File, mountPath: String, module: String?)
-
-    fun resolve(path: String): Asset?
-
-    fun resolveRelative(from: Asset, path: String): Asset?
-
-    fun resolveRelative(from: String, path: String): Asset?
 }
 
 class AssetManagerImpl(
