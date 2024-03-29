@@ -6,13 +6,13 @@ import java.io.File
 
 class AssetSpec : DescribeSpec({
     describe("Asset") {
-        it("should have a mapped path") {
+        it("should have a mapped file") {
             val asset = Asset(
                 sourceFile = File("src/test/resources/test-assets/text-asset.txt"),
                 targetFile = File("/assets/text-asset.txt"),
                 digest = "123456"
             )
-            asset.mappedPath shouldBe "text-asset-123456.txt"
+            asset.mappedFile shouldBe File("/assets/text-asset-123456.txt")
         }
     }
 })
