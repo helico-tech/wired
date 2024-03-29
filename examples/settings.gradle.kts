@@ -8,6 +8,6 @@ dependencyResolutionManagement {
     }
 }
 
-includeBuild("../shared")
-
-include("basic")
+//includeBuild("../shared")
+//include("basic")
+include("testing")
