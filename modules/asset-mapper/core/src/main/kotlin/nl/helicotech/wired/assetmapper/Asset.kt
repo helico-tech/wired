@@ -6,4 +6,6 @@ data class Asset(
     val sourceFile: File,
     val targetFile: File,
     val digest: String
-)
+) {
+    val mappedPath = "${targetFile.nameWithoutExtension}-${digest}.${targetFile.extension}"
+}

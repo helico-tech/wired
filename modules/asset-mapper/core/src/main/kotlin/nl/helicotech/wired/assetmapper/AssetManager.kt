@@ -15,6 +15,23 @@ interface AssetManager {
     val assets: Set<Asset>
 
     fun addAsset(file: File, mountPath: String = "/assets")
+
+    fun resolve(path: String): Asset? {
+        return assets.find { it.targetFile.path == path }
+    }
+
+    fun resolveRelative(from: Asset, path: String): Asset? {
+        require(assets.contains(from)) { "Asset is not managed: $from" }
+        return assets.find {
+            it.targetFile.path == from.targetFile.parentFile.resolve(path).canonicalPath
+        }
+    }
+
+    fun resolveRelative(from: String, path: String): Asset? {
+        val fromAsset = resolve(from)
+        requireNotNull(fromAsset) { "Asset is not managed: $from" }
+        return resolveRelative(fromAsset, path)
+    }
 }
 
 class AssetManagerImpl(

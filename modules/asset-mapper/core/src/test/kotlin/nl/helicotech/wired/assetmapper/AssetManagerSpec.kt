@@ -19,6 +19,7 @@ class AssetManagerSpec : DescribeSpec({
     }
 
     describe("AssetManager") {
+
         describe("addAsset") {
             it("should fail when file does not exist") {
                 val file = File("non-existing-file")
@@ -79,6 +80,60 @@ class AssetManagerSpec : DescribeSpec({
                 assetManager.assets.map { it.targetFile } shouldBe listOf(File("/assets/text-asset.txt"), File("/assets-2/text-asset.txt"))
             }
         }
+
+        describe("resolve") {
+            it("should return null when asset is not found") {
+                assetManager.resolve("/assets/non-existing-asset.txt") shouldBe null
+            }
+
+            it("should return asset") {
+                val assetFile = testAssetsDir.resolve("text-asset.txt")
+                assetManager.addAsset(assetFile)
+                assetManager.resolve("/assets/text-asset.txt") shouldBe assetManager.assets.first()
+            }
+        }
+
+        describe("resolveRelative") {
+            it("should fail when asset is not managed") {
+                val assetFile = testAssetsDir.resolve("text-asset.txt")
+                assetManager.addAsset(assetFile, "/foo")
+                val exception = shouldThrow<IllegalArgumentException> {
+                    assetManager.resolveRelative("/assets/text-asset.txt", "non-existing-asset.txt")
+                }
+                exception.message shouldBe "Asset is not managed: /assets/text-asset.txt"
+            }
+
+            it("should return null when asset is not found") {
+                val assetFile = testAssetsDir.resolve("text-asset.txt")
+                assetManager.addAsset(assetFile)
+                assetManager.resolveRelative("/assets/text-asset.txt", "non-existing-asset.txt") shouldBe null
+            }
+
+            it("should return asset in other top level directory") {
+                val assetFile1 = testAssetsDir.resolve("text-asset.txt")
+                val assetFile2 = testAssets2Dir.resolve("text-asset.txt")
+                assetManager.addAsset(assetFile1, "/assets")
+                assetManager.addAsset(assetFile2, "/assets-2")
+                assetManager.resolveRelative("/assets/text-asset.txt", "../assets-2/text-asset.txt") shouldBe assetManager.assets.last()
+            }
+
+            it("should return asset in other sub directory") {
+                val assetFile1 = testAssetsDir.resolve("text-asset.txt")
+                val assetFile2 = testAssets2Dir.resolve("text-asset.txt")
+                assetManager.addAsset(assetFile1, "/assets")
+                assetManager.addAsset(assetFile2, "/assets/sub-dir")
+                assetManager.resolveRelative("/assets/text-asset.txt", "sub-dir/text-asset.txt") shouldBe assetManager.assets.last()
+            }
+
+            it("should return asset in same directory") {
+                val assetFile1 = testAssetsDir.resolve("text-asset.txt")
+                val assetFile2 = testAssetsDir.resolve("text-asset-2.txt")
+                assetManager.addAsset(assetFile1, "/assets")
+                assetManager.addAsset(assetFile2, "/assets")
+                assetManager.resolveRelative("/assets/text-asset.txt", "text-asset-2.txt") shouldBe assetManager.assets.last()
+            }
+        }
+
     }
 
 })
