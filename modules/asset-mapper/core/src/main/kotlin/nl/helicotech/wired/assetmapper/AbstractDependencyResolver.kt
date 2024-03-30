@@ -1,13 +1,11 @@
 package nl.helicotech.wired.assetmapper
 
-import io.ktor.http.*
-
 abstract class AbstractDependencyResolver(
     private val assetResolver: AssetResolver,
     private val sourceHandlerFactory: SourceHandler.Factory
 ) : DependencyResolver {
 
-    override fun resolve(asset: Asset): Set<Asset> {
+    override fun resolve(asset: Asset): Set<Dependency> {
         val sourceHandler = sourceHandlerFactory.create(asset.sourceFile.readLines())
 
         val imports = sourceHandler.getSourceDependencies()
@@ -18,7 +16,7 @@ abstract class AbstractDependencyResolver(
 
         require(missing.isEmpty()) { "Missing dependencies: $missing" }
 
-        return assets.mapNotNull { it.second }.toSet()
+        return assets.map { Dependency(asset, it.second!!, it.first) }.toSet()
     }
 }
 
