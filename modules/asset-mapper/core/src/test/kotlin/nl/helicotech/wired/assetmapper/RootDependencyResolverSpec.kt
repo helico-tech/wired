@@ -1,7 +1,9 @@
 package nl.helicotech.wired.assetmapper
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldStartWith
 import nl.helicotech.wired.assetmapper.js.JavascriptDependencyResolver
 import java.io.File
 
@@ -15,6 +17,10 @@ class RootDependencyResolverSpec : DescribeSpec({
         assetManager.addAsset(resourcesDir.resolve("transient-1.js"), "/assets", null)
         assetManager.addAsset(resourcesDir.resolve("transient-2.js"), "/assets", null)
         assetManager.addAsset(resourcesDir.resolve("transient-3.js"), "/assets", null)
+
+        assetManager.addAsset(resourcesDir.resolve("circular-1.js"), "/assets", null)
+        assetManager.addAsset(resourcesDir.resolve("circular-2.js"), "/assets", null)
+        assetManager.addAsset(resourcesDir.resolve("circular-3.js"), "/assets", null)
 
         val resolver = RootDependencyResolver(
             assetManager,
@@ -32,6 +38,16 @@ class RootDependencyResolverSpec : DescribeSpec({
 
             dependencies[1].to.targetFile.path shouldBe "/assets/transient-3.js"
             dependencies[1].from.targetFile.path shouldBe "/assets/transient-2.js"
+        }
+
+        it("should detect circular1 dependencies") {
+            val asset = requireNotNull(assetManager.resolve("/assets/circular-1.js"))
+
+            val exception = shouldThrow<IllegalArgumentException> {
+                resolver.resolve(asset)
+            }
+
+            exception.message shouldStartWith  "Circular dependency detected"
         }
     }
 })
