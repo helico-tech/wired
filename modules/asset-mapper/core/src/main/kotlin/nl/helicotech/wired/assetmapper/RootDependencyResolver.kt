@@ -1,8 +1,11 @@
 package nl.helicotech.wired.assetmapper
 
 class RootDependencyResolver(
-    private val resolvers: List<DependencyResolver>
+    private val assetResolver: AssetResolver,
+    vararg resolverFactories: DependencyResolver.Factory
 ) : DependencyResolver {
+
+    private val resolvers = resolverFactories.map { it.create(assetResolver) }
 
     override fun accepts(asset: Asset): Boolean {
         return resolvers.any { it.accepts(asset) }
@@ -34,5 +37,11 @@ class RootDependencyResolver(
         }
 
         return resolvedDependencies
+    }
+
+    companion object  {
+        operator fun invoke(vararg resolverFactories: DependencyResolver.Factory): DependencyResolver.Factory {
+            return DependencyResolver.Factory { assetResolver -> RootDependencyResolver(assetResolver, *resolverFactories) }
+        }
     }
 }
