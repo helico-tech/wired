@@ -15,22 +15,27 @@ class JavascriptDependencyResolverSpec : DescribeSpec({
         assetManager.addAsset(resourcesDir.resolve("app.js"), "/assets", null)
         assetManager.addAsset(resourcesDir.resolve("duck.js"), "/assets", null)
         assetManager.addAsset(resourcesDir.resolve("./subdirectory/cow.js"), "/assets/subdirectory", null)
+        assetManager.addAsset(resourcesDir.resolve("./vendors/@namespace/company/lib.js"), "/assets/vendors/@namespace/company", "@namespace/company")
 
         val resolver = JavascriptDependencyResolver.create(assetManager)
 
         it("should resolve dependencies") {
             val asset = requireNotNull(assetManager.resolve("/assets/app.js"))
 
-            val dependencies = resolver.resolve(asset)
+            val dependencies = resolver.resolve(asset).toList()
 
-            dependencies.size shouldBe 2
-            dependencies.first().to.targetFile.path shouldBe "/assets/duck.js"
-            dependencies.first().from.targetFile.path shouldBe "/assets/app.js"
-            dependencies.first().logicalName shouldBe "./duck.js"
+            dependencies.size shouldBe 3
+            dependencies[0].to.targetFile.path shouldBe "/assets/duck.js"
+            dependencies[0].from.targetFile.path shouldBe "/assets/app.js"
+            dependencies[0].logicalName shouldBe "./duck.js"
 
-            dependencies.last().to.targetFile.path shouldBe "/assets/subdirectory/cow.js"
-            dependencies.last().from.targetFile.path shouldBe "/assets/app.js"
-            dependencies.last().logicalName shouldBe "./subdirectory/cow.js"
+            dependencies[1].to.targetFile.path shouldBe "/assets/subdirectory/cow.js"
+            dependencies[1].from.targetFile.path shouldBe "/assets/app.js"
+            dependencies[1].logicalName shouldBe "./subdirectory/cow.js"
+
+            dependencies[2].to.targetFile.path shouldBe "/assets/vendors/@namespace/company/lib.js"
+            dependencies[2].from.targetFile.path shouldBe "/assets/app.js"
+            dependencies[2].logicalName shouldBe "@namespace/company"
         }
     }
 })
