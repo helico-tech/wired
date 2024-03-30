@@ -1,11 +1,11 @@
 package nl.helicotech.wired.assetmapper.js
 
-import java.io.InputStream
+import nl.helicotech.wired.assetmapper.SourceHandler
 
 class JavascriptSourceHandler(
     private val lines: List<String>
-) {
-    companion object {
+) : SourceHandler {
+    companion object : SourceHandler.Factory {
         private val LINES_THAT_START_WITH_COMMENTS = "^(?:\\/\\/.*)"
         private val STRINGS_ENCLOSED_IN_SINGLE_QUOTES = "\\'(?:[^\\'\\\\\\n]|\\\\.)*+\\'"
         private val STRINGS_ENCLOSED_IN_DOUBLE_QUOTES = "\"(?:[^\"\\\\\\n]|\\\\.)*+\""
@@ -14,10 +14,14 @@ class JavascriptSourceHandler(
         private val IMPORT_REGEX = Regex(
             """$LINES_THAT_START_WITH_COMMENTS|$STRINGS_ENCLOSED_IN_SINGLE_QUOTES|$STRINGS_ENCLOSED_IN_DOUBLE_QUOTES|$IMPORT_STATEMENTS$REST"""
         )
+
+        override fun create(lines: List<String>): SourceHandler {
+            return JavascriptSourceHandler(lines)
+        }
     }
 
-    fun getImports(): Set<String> {
-        return lines.fold(mutableSetOf<String>()) { dependencies, line ->
+    override fun getSourceDependencies(): Set<String> {
+        return lines.fold(mutableSetOf()) { dependencies, line ->
             dependencies.addAll(IMPORT_REGEX.findAll(line).map { it.groupValues[1] }.filterNot { it.isBlank() })
             dependencies
         }

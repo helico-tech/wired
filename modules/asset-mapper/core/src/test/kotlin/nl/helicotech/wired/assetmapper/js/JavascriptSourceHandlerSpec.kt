@@ -16,7 +16,7 @@ class JavascriptSourceHandlerSpec : DescribeSpec({
 
                 val sourceHandler = JavascriptSourceHandler(source)
 
-                val dependencies = sourceHandler.getImports()
+                val dependencies = sourceHandler.getSourceDependencies()
 
                 dependencies shouldBe setOf("dependency1.js", "dependency2.js")
             }
@@ -29,7 +29,7 @@ class JavascriptSourceHandlerSpec : DescribeSpec({
 
                 val sourceHandler = JavascriptSourceHandler(source)
 
-                val dependencies = sourceHandler.getImports()
+                val dependencies = sourceHandler.getSourceDependencies()
 
                 dependencies shouldBe setOf("dependency1.js", "dependency2.js")
             }
@@ -42,7 +42,7 @@ class JavascriptSourceHandlerSpec : DescribeSpec({
 
                 val sourceHandler = JavascriptSourceHandler(source)
 
-                val dependencies = sourceHandler.getImports()
+                val dependencies = sourceHandler.getSourceDependencies()
 
                 dependencies shouldBe setOf("dependency1.js", "dependency2.js")
             }
@@ -52,7 +52,7 @@ class JavascriptSourceHandlerSpec : DescribeSpec({
 
                 val sourceHandler = JavascriptSourceHandler(source)
 
-                val dependencies = sourceHandler.getImports()
+                val dependencies = sourceHandler.getSourceDependencies()
 
                 dependencies shouldBe setOf("dependency1.js", "dependency2.js")
             }
@@ -65,7 +65,7 @@ class JavascriptSourceHandlerSpec : DescribeSpec({
 
                 val sourceHandler = JavascriptSourceHandler(source)
 
-                val dependencies = sourceHandler.getImports()
+                val dependencies = sourceHandler.getSourceDependencies()
 
                 dependencies shouldBe setOf("./dependency1.js", "../dependency2.js")
             }
@@ -78,7 +78,7 @@ class JavascriptSourceHandlerSpec : DescribeSpec({
 
                 val sourceHandler = JavascriptSourceHandler(source)
 
-                val dependencies = sourceHandler.getImports()
+                val dependencies = sourceHandler.getSourceDependencies()
 
                 dependencies shouldBe setOf("namespace/dependency1.js", "@namespace/dependency2.js")
             }
@@ -88,7 +88,7 @@ class JavascriptSourceHandlerSpec : DescribeSpec({
 
                 val sourceHandler = JavascriptSourceHandler(source)
 
-                val dependencies = sourceHandler.getImports()
+                val dependencies = sourceHandler.getSourceDependencies()
 
                 dependencies shouldBe emptySet()
             }
