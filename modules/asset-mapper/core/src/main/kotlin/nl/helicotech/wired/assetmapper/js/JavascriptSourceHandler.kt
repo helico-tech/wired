@@ -1,10 +1,10 @@
-package nl.helicotech.wired.assetmapper
+package nl.helicotech.wired.assetmapper.js
 
-import io.ktor.http.*
 import java.io.InputStream
 
-class JavascriptDependencyResolver : DependencyResolver {
-
+class JavascriptSourceHandler(
+    private val lines: List<String>
+) {
     companion object {
         private val LINES_THAT_START_WITH_COMMENTS = "^(?:\\/\\/.*)"
         private val STRINGS_ENCLOSED_IN_SINGLE_QUOTES = "\\'(?:[^\\'\\\\\\n]|\\\\.)*+\\'"
@@ -16,12 +16,8 @@ class JavascriptDependencyResolver : DependencyResolver {
         )
     }
 
-    override fun accepts(asset: Asset): Boolean {
-        return asset.contentType.match(ContentType.Application.JavaScript)
-    }
-
-    override fun resolve(source: InputStream): Set<String> {
-        return source.reader().readLines().fold(mutableSetOf()) { dependencies, line ->
+    fun getImports(): Set<String> {
+        return lines.fold(mutableSetOf<String>()) { dependencies, line ->
             dependencies.addAll(IMPORT_REGEX.findAll(line).map { it.groupValues[1] }.filterNot { it.isBlank() })
             dependencies
         }

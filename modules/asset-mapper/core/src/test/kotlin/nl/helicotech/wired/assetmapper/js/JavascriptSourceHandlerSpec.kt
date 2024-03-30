@@ -1,56 +1,22 @@
-package nl.helicotech.wired.assetmapper
+package nl.helicotech.wired.assetmapper.js
 
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
-import io.ktor.http.*
-import java.io.File
 
-class JavascriptDependencyResolverSpec : DescribeSpec({
+class JavascriptSourceHandlerSpec : DescribeSpec({
 
-    describe("JavascriptDependencyResolver") {
+    describe("JavascriptSourceHandler") {
 
-        val resolver = JavascriptDependencyResolver()
-
-        describe("accepts") {
-            it("should only accept javascript files") {
-                val asset = Asset(
-                    sourceFile = File("src/test/resources/test-assets/text-asset.js"),
-                    targetFile = File("/assets/text-asset.js"),
-                    digest = "123456",
-                    moduleName = null
-                )
-                resolver.accepts(asset) shouldBe true
-            }
-
-            it("should not accept non-javascript files") {
-                val nonJavascriptContentTypes = listOf(
-                    ContentType.Text.CSS.withCharset(Charsets.UTF_8),
-                    ContentType.Text.Html.withCharset(Charsets.UTF_8),
-                    ContentType.Application.Json,
-                    ContentType.Text.Plain.withCharset(Charsets.UTF_8),
-                    ContentType.Application.Xml
-                )
-
-                nonJavascriptContentTypes.forEach { contentType ->
-                    val asset = Asset(
-                        sourceFile = File("src/test/resources/test-assets/text-asset.txt"),
-                        targetFile = File("/assets/text-asset.txt"),
-                        digest = "123456",
-                        moduleName = null
-                    )
-                    resolver.accepts(asset) shouldBe false
-                }
-            }
-        }
-
-        describe("resolve") {
+        describe("getImports") {
             it("should resolve basic dependencies") {
                 val source = listOf(
                     "import 'dependency1.js'",
                     "import 'dependency2.js'"
                 )
 
-                val dependencies = resolver.resolve(source)
+                val sourceHandler = JavascriptSourceHandler(source)
+
+                val dependencies = sourceHandler.getImports()
 
                 dependencies shouldBe setOf("dependency1.js", "dependency2.js")
             }
@@ -61,7 +27,9 @@ class JavascriptDependencyResolverSpec : DescribeSpec({
                     "import \"dependency2.js\""
                 )
 
-                val dependencies = resolver.resolve(source)
+                val sourceHandler = JavascriptSourceHandler(source)
+
+                val dependencies = sourceHandler.getImports()
 
                 dependencies shouldBe setOf("dependency1.js", "dependency2.js")
             }
@@ -72,7 +40,9 @@ class JavascriptDependencyResolverSpec : DescribeSpec({
                     "import \"dependency2.js\""
                 )
 
-                val dependencies = resolver.resolve(source)
+                val sourceHandler = JavascriptSourceHandler(source)
+
+                val dependencies = sourceHandler.getImports()
 
                 dependencies shouldBe setOf("dependency1.js", "dependency2.js")
             }
@@ -80,7 +50,9 @@ class JavascriptDependencyResolverSpec : DescribeSpec({
             it("should resolve dependencies on the same line") {
                 val source = listOf("import 'dependency1.js'; import 'dependency2.js';")
 
-                val dependencies = resolver.resolve(source)
+                val sourceHandler = JavascriptSourceHandler(source)
+
+                val dependencies = sourceHandler.getImports()
 
                 dependencies shouldBe setOf("dependency1.js", "dependency2.js")
             }
@@ -91,7 +63,9 @@ class JavascriptDependencyResolverSpec : DescribeSpec({
                     "import '../dependency2.js'"
                 )
 
-                val dependencies = resolver.resolve(source)
+                val sourceHandler = JavascriptSourceHandler(source)
+
+                val dependencies = sourceHandler.getImports()
 
                 dependencies shouldBe setOf("./dependency1.js", "../dependency2.js")
             }
@@ -102,7 +76,9 @@ class JavascriptDependencyResolverSpec : DescribeSpec({
                     "import '@namespace/dependency2.js'"
                 )
 
-                val dependencies = resolver.resolve(source)
+                val sourceHandler = JavascriptSourceHandler(source)
+
+                val dependencies = sourceHandler.getImports()
 
                 dependencies shouldBe setOf("namespace/dependency1.js", "@namespace/dependency2.js")
             }
@@ -110,7 +86,9 @@ class JavascriptDependencyResolverSpec : DescribeSpec({
             it("should not resolve dependencies if there are none") {
                 val source = listOf("console.log('import \"Hello, world!\"')")
 
-                val dependencies = resolver.resolve(source)
+                val sourceHandler = JavascriptSourceHandler(source)
+
+                val dependencies = sourceHandler.getImports()
 
                 dependencies shouldBe emptySet()
             }
