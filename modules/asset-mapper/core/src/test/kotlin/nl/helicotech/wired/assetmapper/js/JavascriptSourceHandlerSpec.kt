@@ -7,18 +7,19 @@ class JavascriptSourceHandlerSpec : DescribeSpec({
 
     describe("JavascriptSourceHandler") {
 
-        describe("getImports") {
+        describe("getSourceDependencies") {
             it("should resolve basic dependencies") {
                 val source = listOf(
-                    "import 'dependency1.js'",
-                    "import 'dependency2.js'"
+                    "import Duck from './duck.js';",
+                    "import Cow from './subdirectory/cow.js';",
+                    "import { libraryFunction } from '@namespace/company'",
                 )
 
                 val sourceHandler = JavascriptSourceHandler(source)
 
                 val dependencies = sourceHandler.getSourceDependencies()
 
-                dependencies shouldBe setOf("dependency1.js", "dependency2.js")
+                dependencies shouldBe setOf("./duck.js", "./subdirectory/cow.js", "@namespace/company")
             }
 
             it("should resolve dependencies with double quotes") {
@@ -91,6 +92,19 @@ class JavascriptSourceHandlerSpec : DescribeSpec({
                 val dependencies = sourceHandler.getSourceDependencies()
 
                 dependencies shouldBe emptySet()
+            }
+
+            it("should detect re-exports") {
+                val source = listOf(
+                    "export * from 'dependency1.js'",
+                    "export { default } from 'dependency2.js'"
+                )
+
+                val sourceHandler = JavascriptSourceHandler(source)
+
+                val dependencies = sourceHandler.getSourceDependencies()
+
+                dependencies shouldBe setOf("dependency1.js", "dependency2.js")
             }
         }
     }
