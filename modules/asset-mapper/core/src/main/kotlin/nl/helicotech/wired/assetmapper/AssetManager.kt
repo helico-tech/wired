@@ -1,39 +1,45 @@
 package nl.helicotech.wired.assetmapper
 
 import java.io.File
+import java.nio.file.Path
+import kotlin.io.path.exists
+import kotlin.io.path.isReadable
+import kotlin.io.path.isRegularFile
 
 
 interface AssetManager : AssetResolver {
 
     companion object {
         operator fun invoke(
+            root: Path,
             digester: Digester = Digester.SHA1
         ): AssetManager = AssetManagerImpl(
+            root = root,
             digester = digester
         )
     }
 
     val assets: Set<Asset>
 
-    fun addAsset(file: File, mountPath: String, module: String?)
+    fun addAsset(file: Path, module: String?)
 }
 
 
 class AssetManagerImpl(
+    private val root: Path,
     private val digester: Digester = Digester.SHA1
 ) : AssetManager {
     override val assets = mutableSetOf<Asset>()
 
     override fun addAsset(
-        file: File,
-        mountPath: String,
+        path: Path,
         module: String?
     ) {
+
         require(file.exists()) { "Asset file does not exist: $file" }
-        require(file.isFile) { "Asset file is not a file: $file" }
-        require(file.canRead()) { "Asset file is not readable: $file" }
-        require(assets.none { it.sourceFile == file }) { "Asset file is already added: $file" }
-        require(mountPath.startsWith("/")) { "Mount path must start with a /: $mountPath" }
+        require(file.isRegularFile()) { "Asset file is not a file: $file" }
+        require(file.isReadable()) { "Asset file is not readable: $file" }
+        require(assets.none { it.absoluteLogicalPath == path }) { "Asset file is already added: $file" }
 
         val asset = Asset(
             sourceFile = file,

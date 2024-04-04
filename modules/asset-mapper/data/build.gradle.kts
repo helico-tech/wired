@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":data"))
     implementation(libs.ktor.http)
     testImplementation(libs.kotest.junit)
 }

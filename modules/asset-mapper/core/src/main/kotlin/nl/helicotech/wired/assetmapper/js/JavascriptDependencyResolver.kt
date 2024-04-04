@@ -2,7 +2,6 @@ package nl.helicotech.wired.assetmapper.js
 
 import io.ktor.http.*
 import nl.helicotech.wired.assetmapper.AbstractDependencyResolver
-import nl.helicotech.wired.assetmapper.Asset
 import nl.helicotech.wired.assetmapper.AssetResolver
 import nl.helicotech.wired.assetmapper.DependencyResolver
 
