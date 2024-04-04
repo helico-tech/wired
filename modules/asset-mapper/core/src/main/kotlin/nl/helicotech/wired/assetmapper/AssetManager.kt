@@ -18,6 +18,7 @@ interface AssetManager : AssetResolver {
     fun addAsset(file: File, mountPath: String, module: String?)
 }
 
+
 class AssetManagerImpl(
     private val digester: Digester = Digester.SHA1
 ) : AssetManager {
