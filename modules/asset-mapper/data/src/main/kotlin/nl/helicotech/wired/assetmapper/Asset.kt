@@ -3,77 +3,46 @@ package nl.helicotech.wired.assetmapper
 import io.ktor.http.*
 import io.ktor.util.*
 import java.nio.file.Path
-import kotlin.io.path.exists
-import kotlin.io.path.isDirectory
 import kotlin.io.path.nameWithoutExtension
 
-abstract class AssetContainer(
-    val logicalPath: Path,
-    val mountPath: Path? = null,
-    val parent: AssetContainer? = null
-) {
-    open val assets: List<Asset> = listOf()
+sealed class Asset {
+    abstract val logicalPath: Path
+    abstract val digest: String
+    abstract val container: AssetContainer
+    abstract val contentType: ContentType
+    abstract val dependencies: () -> List<Asset>
 
-    open val containers: List<AssetContainer> = listOf()
+    val digestName get() = "${logicalPath.nameWithoutExtension}-$digest.${logicalPath.extension}"
+    val absoluteLogicalPath get() = container.absoluteMountPath.resolve(logicalPath)
+    val absoluteMountPath get() =  container.absoluteMountPath.resolve(digestName)
 
-    constructor(logicalPath: String, mountPath: String? = null, parent: AssetContainer? = null) :
-            this(Path.of(logicalPath), mountPath?.let { Path.of(it) }, parent)
-
-    fun traverse(filter: (Asset) -> Boolean = { true }): Sequence<Asset> = sequence {
-        for (asset in assets) {
-            if (filter(asset)) {
-                yield(asset)
-            }
-        }
-
-        for (container in containers) {
-            yieldAll(container.traverse(filter))
-        }
-    }
-
-    fun traverseUp(): Sequence<AssetContainer> = sequence {
-        parent?.let {
-            yieldAll(it.traverseUp())
-        }
-
-        yield(this@AssetContainer)
-    }
-
-    val absoluteMountPath: Path = traverseUp().map { it.mountPath ?: it.logicalPath }.joinToString("/").let { Path.of(it) }
-
-    val absoluteLogicalPath = traverseUp().map { it.logicalPath }.joinToString("/").let { Path.of(it) }
-}
-
-sealed class Asset(
-    val logicalPath: Path,
-    val digest: String,
-    val container: AssetContainer,
-    val contentType: ContentType
-) {
     class Generic(
-        logicalPath: Path,
-        digest: String,
-        contentType: ContentType,
-        container: AssetContainer
-    ) : Asset(logicalPath, digest, container, contentType)  {
-        constructor(logicalPath: String, digest: String, contentType: ContentType, container: AssetContainer) :
-                this(Path.of(logicalPath), digest, contentType, container)
-
-    }
+        override val logicalPath: Path,
+        override val digest: String,
+        override val container: AssetContainer,
+        override val contentType: ContentType,
+        override val dependencies: () -> List<Asset>
+    ) : Asset()
 
     class JavaScript(
-        val module: String? = null,
-        logicalPath: Path,
-        digest: String,
-        container: AssetContainer,
-        val dependencies: () -> List<Asset> = { emptyList() }
-    ) : Asset(logicalPath, digest, container, ContentType.Application.JavaScript) {
-        constructor(module: String? = null, logicalPath: String, digest: String, container: AssetContainer, dependencies: () -> List<Asset> = { emptyList() }) : this(module, Path.of(logicalPath), digest, container, dependencies)
+        val module: String?,
+        override val logicalPath: Path,
+        override val digest: String,
+        override val container: AssetContainer,
+        override val dependencies: () -> List<Asset>
+    ) : Asset() {
+        override val contentType = ContentType.Application.JavaScript
     }
+}
 
-    val digestName = "${logicalPath.nameWithoutExtension}-$digest.${logicalPath.extension}"
+fun AssetContainer.Mutable.addGenericAsset(logicalPath: Path, digest: String, contentType: ContentType, dependencies: () -> List<Asset> = { emptyList() }): Asset.Generic {
+    val asset = Asset.Generic(logicalPath, digest, this, contentType, dependencies)
+    assets.add(asset)
+    return asset
+}
 
-    val absoluteLogicalPath = container.absoluteMountPath.resolve(logicalPath)
-
-    val absoluteMountPath = container.absoluteMountPath.resolve(digestName)
+fun AssetContainer.Mutable.addJavaScriptAsset(logicalPath: Path, digest: String, module: String?, dependencies: () -> List<Asset> = { emptyList() }): Asset.JavaScript {
+    val asset = Asset.JavaScript(module, logicalPath, digest, this, dependencies)
+    assets.add(asset)
+    return asset
 }
