@@ -4,6 +4,7 @@ import io.ktor.http.*
 import io.ktor.util.*
 import java.nio.file.Path
 import kotlin.io.path.nameWithoutExtension
+import kotlin.io.path.readText
 
 sealed class Asset {
     abstract val logicalPath: Path
@@ -13,8 +14,8 @@ sealed class Asset {
     abstract val dependencies: () -> List<Asset>
 
     val digestName get() = "${logicalPath.nameWithoutExtension}-$digest.${logicalPath.extension}"
-    val absoluteLogicalPath get() = container.absoluteMountPath.resolve(logicalPath)
-    val absoluteMountPath get() =  container.absoluteMountPath.resolve(digestName)
+    val absoluteLogicalPath get() = container.logicalPath.resolve(logicalPath)
+    val absoluteMountPath get() =  container.mountPath?.resolve(digestName)
 
     class Generic(
         override val logicalPath: Path,
@@ -33,6 +34,14 @@ sealed class Asset {
     ) : Asset() {
         override val contentType = ContentType.Application.JavaScript
     }
+
+    class Mutable(
+        override var logicalPath: Path,
+        override var digest: String,
+        override var container: AssetContainer,
+        override var contentType: ContentType,
+        override var dependencies: () -> List<Asset>
+    ) : Asset()
 }
 
 fun AssetContainer.Mutable.addGenericAsset(logicalPath: Path, digest: String, contentType: ContentType, dependencies: () -> List<Asset> = { emptyList() }): Asset.Generic {

@@ -6,42 +6,38 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
 import nl.helicotech.wired.assetmapper.js.JavascriptDependencyResolver
 import java.io.File
+import java.nio.file.Path
 
 class RootDependencyResolverSpec : DescribeSpec({
     describe("RootDependencyResolver") {
 
-        val assetManager = AssetManager()
+        val container = AssetContainer.createMutable("src/test/resources/dependency-resolver")
 
-        val resourcesDir = File("src/test/resources/dependency-resolver")
+        container.addJavaScriptAsset(Path.of("transient-1.js"), "123", null)
+        container.addJavaScriptAsset(Path.of("transient-2.js"), "123", null)
+        container.addJavaScriptAsset(Path.of("transient-3.js"), "123", null)
 
-        assetManager.addAsset(resourcesDir.resolve("transient-1.js"), "/assets", null)
-        assetManager.addAsset(resourcesDir.resolve("transient-2.js"), "/assets", null)
-        assetManager.addAsset(resourcesDir.resolve("transient-3.js"), "/assets", null)
-
-        assetManager.addAsset(resourcesDir.resolve("circular-1.js"), "/assets", null)
-        assetManager.addAsset(resourcesDir.resolve("circular-2.js"), "/assets", null)
-        assetManager.addAsset(resourcesDir.resolve("circular-3.js"), "/assets", null)
+        container.addJavaScriptAsset(Path.of("circular-1.js"), "123", null)
+        container.addJavaScriptAsset(Path.of("circular-2.js"), "123", null)
+        container.addJavaScriptAsset(Path.of("circular-3.js"), "123", null)
 
         val resolver = RootDependencyResolver(
-            assetManager,
+            container,
             JavascriptDependencyResolver
         )
 
         it("should resolve transient dependencies") {
-            val asset = requireNotNull(assetManager.resolve("/assets/transient-1.js"))
+            val asset = requireNotNull(container.resolve(Path.of("./transient-1.js")))
 
             val dependencies = resolver.resolve(asset).toList()
 
             dependencies.size shouldBe 2
-            dependencies[0].to.targetFile.path shouldBe "/assets/transient-2.js"
-            dependencies[0].from.targetFile.path
-
-            dependencies[1].to.targetFile.path shouldBe "/assets/transient-3.js"
-            dependencies[1].from.targetFile.path shouldBe "/assets/transient-2.js"
+            dependencies[0].to.logicalPath shouldBe Path.of("transient-2.js")
+            dependencies[0].from.logicalPath
         }
 
-        it("should detect circular1 dependencies") {
-            val asset = requireNotNull(assetManager.resolve("/assets/circular-1.js"))
+        it("should detect circular1dependencies") {
+            val asset = requireNotNull(container.resolve(Path.of("./circular-1.js")))
 
             val exception = shouldThrow<IllegalArgumentException> {
                 resolver.resolve(asset)

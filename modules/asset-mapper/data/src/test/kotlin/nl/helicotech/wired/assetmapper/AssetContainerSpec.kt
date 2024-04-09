@@ -21,10 +21,6 @@ class AssetContainerSpec : DescribeSpec({
                 container.assets.size shouldBe 0
             }
 
-            it("should have an empty list of containers") {
-                container.containers.size shouldBe 0
-            }
-
             describe("when adding an asset") {
                 container.addGenericAsset(Path.of("test.txt"), "digest", ContentType.Text.Plain)
 
@@ -42,29 +38,19 @@ class AssetContainerSpec : DescribeSpec({
             }
 
             describe("when adding a sub container") {
-                val sub = container.addContainer(Path.of("sub"))
 
                 beforeEach {
                     container.assets.clear()
-                    sub.assets.clear()
-                }
-
-                it("should have one container") {
-                    container.containers.size shouldBe 1
-                }
-
-                it("should have the correct container") {
-                    container.containers[0].logicalPath shouldBe Path.of("sub")
                 }
 
                 it("should be able to resolve an asset in the container") {
-                    sub.addGenericAsset(Path.of("test2.txt"), "digest", ContentType.Text.Plain)
-                    container.resolve(Path.of("./sub/test2.txt")) shouldBe sub.assets[0]
+                    container.addGenericAsset(Path.of("sub/test2.txt"), "digest", ContentType.Text.Plain)
+                    container.resolve(Path.of("./sub/test2.txt")) shouldBe container.assets[0]
                 }
 
                 it("should be able to resolve relative assets") {
                     val asset1 = container.addGenericAsset(Path.of("test.txt"), "digest", ContentType.Text.Plain)
-                    val asset2 = sub.addGenericAsset(Path.of("test2.txt"), "digest", ContentType.Text.Plain)
+                    val asset2 = container.addGenericAsset(Path.of("sub/test2.txt"), "digest", ContentType.Text.Plain)
 
                     val result1 = container.resolveRelative(Path.of("./sub/test2.txt"), Path.of("../test.txt"))
                     result1 shouldBe asset1
@@ -76,7 +62,7 @@ class AssetContainerSpec : DescribeSpec({
                 it("should be able to resolve Javascript modules") {
                     val asset1 = container.addJavaScriptAsset(Path.of("test.js"), "digest", null)
                     val asset2 = container.addJavaScriptAsset(Path.of("@hotwired/turbo.js"), "digest", "@hotwired/turbo")
-                    val asset3 = sub.addJavaScriptAsset(Path.of("@bootstrap/core.js"), "digest", "@bootstrap/core")
+                    val asset3 = container.addJavaScriptAsset(Path.of("sub/@bootstrap/core.js"), "digest", "@bootstrap/core")
 
                     val result = container.resolveRelative(asset1, Path.of("@hotwired/turbo"))
                     result shouldBe asset2

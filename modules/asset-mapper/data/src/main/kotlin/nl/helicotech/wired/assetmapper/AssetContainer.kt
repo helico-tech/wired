@@ -5,42 +5,28 @@ import java.nio.file.Path
 interface AssetContainer : AssetResolver {
 
     companion object {
-        fun createMutable(logicalPath: Path, mountPath: Path? = null, parent: AssetContainer? = null): Mutable = Mutable(logicalPath, mountPath, parent)
-        fun createMutable(logicalPath: String, mountPath: String? = null, parent: AssetContainer? = null): Mutable = createMutable(Path.of(logicalPath), mountPath?.let { Path.of(it) }, parent)
-        fun create(logicalPath: Path, mountPath: Path? = null, parent: AssetContainer? = null): AssetContainer = createMutable(logicalPath, mountPath, parent)
-        fun create(logicalPath: String, mountPath: String? = null, parent: AssetContainer? = null): AssetContainer = createMutable(logicalPath, mountPath, parent)
+        fun createMutable(logicalPath: Path, mountPath: Path? = null): Mutable = Mutable(logicalPath, mountPath)
+        fun createMutable(logicalPath: String, mountPath: String? = null): Mutable = createMutable(Path.of(logicalPath), mountPath?.let { Path.of(it) })
+        fun create(logicalPath: Path, mountPath: Path? = null): AssetContainer = createMutable(logicalPath, mountPath)
+        fun create(logicalPath: String, mountPath: String? = null): AssetContainer = createMutable(logicalPath, mountPath)
     }
 
     class Mutable(
         override var logicalPath: Path,
         override var mountPath: Path?,
-        override var parent: AssetContainer?
     ) : AssetContainer {
         override val assets: MutableList<Asset> = mutableListOf()
-        override val containers: MutableList<AssetContainer> = mutableListOf()
-
-        fun addContainer(logicalPath: Path): AssetContainer.Mutable {
-            val container = createMutable(logicalPath, null, this)
-            containers.add(container)
-            return container
-        }
     }
 
     val logicalPath: Path
-    val mountPath: Path?
-    val parent: AssetContainer?
+    var mountPath: Path?
 
     val assets: List<Asset>
-    val containers: List<AssetContainer>
-
-    val absoluteMountPath: Path get() = traverseUp().map { it.mountPath ?: it.logicalPath }.joinToString("/").let { Path.of(it) }
-
-    val absoluteLogicalPath get() = traverseUp().map { it.logicalPath }.joinToString("/").let { Path.of(it) }
 
     override fun resolve(path: Path): Asset? = traverse().firstOrNull { asset ->
         when {
             path.isModule() -> asset is Asset.JavaScript && asset.module == path.toString()
-            else -> asset.absoluteLogicalPath == logicalPath.resolve(path).normalize()
+            else -> asset.absoluteLogicalPath.normalize() == logicalPath.resolve(path).normalize()
         }
     }
 
@@ -49,11 +35,11 @@ interface AssetContainer : AssetResolver {
 
         if (path.isModule()) return resolve(path)
 
-        val basePath = Path.of(".").resolve(from.absoluteLogicalPath.first().relativize(from.absoluteLogicalPath).parent ?: Path.of(""))
+        val absolutePathToResolve = from.absoluteLogicalPath.parent.resolve(path).normalize()
 
-        val pathToResolve = Path.of(".").resolve(basePath.resolve(path).normalize())
+        val relativePathToResolve = Path.of(".").resolve(this.logicalPath.relativize(absolutePathToResolve))
 
-        return resolve(pathToResolve)
+        return resolve(relativePathToResolve)
     }
 
     override fun resolveRelative(from: Path, path: Path): Asset? {
@@ -67,18 +53,6 @@ interface AssetContainer : AssetResolver {
                 yield(asset)
             }
         }
-
-        for (container in containers) {
-            yieldAll(container.traverse(filter))
-        }
-    }
-
-    fun traverseUp(): Sequence<AssetContainer> = sequence {
-        parent?.let {
-            yieldAll(it.traverseUp())
-        }
-
-        yield(this@AssetContainer)
     }
 
     private fun Path.isRelative() = startsWith("/") || startsWith(".") || startsWith("..")
