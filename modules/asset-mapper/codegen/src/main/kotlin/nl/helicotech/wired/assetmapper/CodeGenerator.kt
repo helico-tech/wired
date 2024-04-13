@@ -45,6 +45,7 @@ class CodeGenerator(
                 type = Path::class.asTypeName().copy(nullable = true),
                 modifiers = setOf(KModifier.OVERRIDE)
             )
+            .mutable()
             .initializer("null")
             .build()
         )

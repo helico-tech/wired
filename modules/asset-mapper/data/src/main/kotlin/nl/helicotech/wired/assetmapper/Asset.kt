@@ -5,6 +5,15 @@ import io.ktor.util.*
 import java.nio.file.Path
 import kotlin.io.path.nameWithoutExtension
 
+fun mutableAsset(
+    module: String? = null,
+    logicalPath: Path,
+    digest: String,
+    container: AssetContainer,
+    contentType: ContentType,
+    dependencies: () -> List<Asset> = { emptyList() }
+) = Asset.Mutable(module, logicalPath, digest, container, contentType, dependencies)
+
 sealed class Asset {
     abstract val logicalPath: Path
     abstract val digest: String
