@@ -13,7 +13,7 @@ class CodeGeneratorSpec : DescribeSpec({
         it("should generate the root container") {
             val codeGenerator = CodeGenerator(
                 assetContainer = container,
-                packageName = "nl.helicotech.wired.assetmapper",
+                packageName = "nl.foo.bar",
                 fileName = "Assets"
             )
 
