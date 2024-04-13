@@ -5,13 +5,12 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
 import nl.helicotech.wired.assetmapper.js.JavascriptDependencyResolver
-import java.io.File
 import java.nio.file.Path
 
 class RootDependencyResolverSpec : DescribeSpec({
     describe("RootDependencyResolver") {
 
-        val container = AssetContainer.createMutable("src/test/resources/dependency-resolver")
+        val container = mutableAssetContainer("src/test/resources/dependency-resolver")
 
         container.addJavaScriptAsset(Path.of("transient-1.js"), "123", null)
         container.addJavaScriptAsset(Path.of("transient-2.js"), "123", null)

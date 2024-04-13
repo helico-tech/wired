@@ -4,7 +4,6 @@ import io.ktor.http.*
 import io.ktor.util.*
 import java.nio.file.Path
 import kotlin.io.path.nameWithoutExtension
-import kotlin.io.path.readText
 
 sealed class Asset {
     abstract val logicalPath: Path
@@ -12,10 +11,6 @@ sealed class Asset {
     abstract val container: AssetContainer
     abstract val contentType: ContentType
     abstract val dependencies: () -> List<Asset>
-
-    val digestName get() = "${logicalPath.nameWithoutExtension}-$digest.${logicalPath.extension}"
-    val absoluteLogicalPath get() = container.logicalPath.resolve(logicalPath)
-    val absoluteMountPath get() =  container.mountPath?.resolve(digestName)
 
     class Generic(
         override val logicalPath: Path,
@@ -36,12 +31,29 @@ sealed class Asset {
     }
 
     class Mutable(
+        var module: String?,
         override var logicalPath: Path,
         override var digest: String,
         override var container: AssetContainer,
         override var contentType: ContentType,
         override var dependencies: () -> List<Asset>
     ) : Asset()
+
+    val digestName get() = "${logicalPath.nameWithoutExtension}-$digest.${logicalPath.extension}"
+    val absoluteLogicalPath get() = container.logicalPath.resolve(logicalPath)
+    val absoluteMountPath get() =  container.mountPath?.resolve(digestName)
+
+    fun asMutable() = when {
+        this is JavaScript -> Mutable(module, logicalPath, digest, container, ContentType.Application.JavaScript,  dependencies)
+        this is Mutable -> this
+        else -> Mutable(null, logicalPath, digest, container, contentType, dependencies)
+    }
+
+    fun asImmutable() = when {
+        this !is Mutable -> this
+        this.contentType == ContentType.Application.JavaScript -> JavaScript(module, logicalPath, digest, container, dependencies)
+        else -> Generic(logicalPath, digest, container, contentType, dependencies)
+    }
 }
 
 fun AssetContainer.Mutable.addGenericAsset(logicalPath: Path, digest: String, contentType: ContentType, dependencies: () -> List<Asset> = { emptyList() }): Asset.Generic {

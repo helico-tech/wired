@@ -4,12 +4,13 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import nl.helicotech.wired.assetmapper.AssetContainer
 import nl.helicotech.wired.assetmapper.addJavaScriptAsset
+import nl.helicotech.wired.assetmapper.mutableAssetContainer
 import kotlin.io.path.Path
 
 class JavascriptDependencyResolverSpec : DescribeSpec({
     describe("JavascriptDependencyResolver") {
 
-        val container = AssetContainer.createMutable("src/test/resources/dependency-resolver")
+        val container = mutableAssetContainer("src/test/resources/dependency-resolver")
 
         container.addJavaScriptAsset(Path("app.js"), "123", null)
         container.addJavaScriptAsset(Path("duck.js"), "123", null)

@@ -4,9 +4,10 @@ plugins {
 
 dependencies {
     implementation(libs.ktor.http)
+
     testImplementation(libs.kotest.junit)
 }
 
-tasks.withType<Test>().configureEach {
+tasks.test {
     useJUnitPlatform()
 }

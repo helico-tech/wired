@@ -2,14 +2,16 @@ package nl.helicotech.wired.assetmapper
 
 import java.nio.file.Path
 
-interface AssetContainer : AssetResolver {
+fun mutableAssetContainer(logicalPath: Path, mountPath: Path? = null): AssetContainer.Mutable {
+    return AssetContainer.Mutable(logicalPath, mountPath)
+}
 
-    companion object {
-        fun createMutable(logicalPath: Path, mountPath: Path? = null): Mutable = Mutable(logicalPath, mountPath)
-        fun createMutable(logicalPath: String, mountPath: String? = null): Mutable = createMutable(Path.of(logicalPath), mountPath?.let { Path.of(it) })
-        fun create(logicalPath: Path, mountPath: Path? = null): AssetContainer = createMutable(logicalPath, mountPath)
-        fun create(logicalPath: String, mountPath: String? = null): AssetContainer = createMutable(logicalPath, mountPath)
-    }
+fun mutableAssetContainer(logicalPath: String, mountPath: String? = null): AssetContainer.Mutable {
+    return mutableAssetContainer(Path.of(logicalPath), mountPath?.let { Path.of(it) })
+}
+
+
+interface AssetContainer : AssetResolver {
 
     class Mutable(
         override var logicalPath: Path,
