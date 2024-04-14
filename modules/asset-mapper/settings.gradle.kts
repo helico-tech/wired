@@ -11,4 +11,3 @@ dependencyResolutionManagement {
 include("data")
 include("core")
 include("server")
-include("codegen")

@@ -22,10 +22,9 @@ interface AssetContainer : AssetResolver {
 
     val logicalPath: Path
     var mountPath: Path?
-
     val assets: List<Asset>
 
-    override fun resolve(path: Path): Asset? = traverse().firstOrNull { asset ->
+    override fun resolve(path: Path): Asset? = assets.firstOrNull { asset ->
         when {
             path.isModule() -> asset is Asset.JavaScript && asset.module == path.toString()
             else -> asset.absoluteLogicalPath.normalize() == logicalPath.resolve(path).normalize()
@@ -33,7 +32,7 @@ interface AssetContainer : AssetResolver {
     }
 
     override fun resolveRelative(from: Asset, path: Path): Asset? {
-        require(traverse().any { it == from }) { "Asset is not in this container" }
+        require(assets.any { it == from }) { "Asset is not in this container" }
 
         if (path.isModule()) return resolve(path)
 
@@ -47,14 +46,6 @@ interface AssetContainer : AssetResolver {
     override fun resolveRelative(from: Path, path: Path): Asset? {
         val fromAsset = requireNotNull(resolve(from)) { "Asset is not in this container" }
         return resolveRelative(fromAsset, path)
-    }
-
-    fun traverse(filter: (Asset) -> Boolean = { true }): Sequence<Asset> = sequence {
-        for (asset in assets) {
-            if (filter(asset)) {
-                yield(asset)
-            }
-        }
     }
 
     private fun Path.isRelative() = startsWith("/") || startsWith(".") || startsWith("..")
