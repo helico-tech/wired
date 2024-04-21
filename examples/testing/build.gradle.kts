@@ -9,6 +9,7 @@ application {
 }
 
 dependencies {
+    implementation("nl.helicotech.wired.asset-mapper:core")
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.netty)
     implementation(libs.ktor.server.core)

@@ -4,7 +4,7 @@ import kotlinx.html.HEAD
 import kotlinx.html.script
 import kotlinx.html.unsafe
 
-data class ImportMap(
+/*data class ImportMap(
     val imports: Map<String, String>
 ) {
     override fun toString(): String {
@@ -57,4 +57,4 @@ fun HEAD.importMap(vararg assets: Asset.JavaScript) {
             module(asset)
         }
     }
-}
+}*/

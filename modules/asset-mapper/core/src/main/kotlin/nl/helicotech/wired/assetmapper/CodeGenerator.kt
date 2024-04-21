@@ -15,11 +15,14 @@ class CodeGenerator(
     private val packageName: String,
     private val fileName: String
 ) {
+
     private val nameAllocators = mutableMapOf<Path, NameAllocator>()
 
     private val dependencyResolver = RootDependencyResolver(JavascriptDependencyResolver).create(assetContainer)
 
     fun generate(): FileSpec {
+        nameAllocators.clear()
+
         val builder = FileSpec.builder(packageName, fileName)
 
         val assetContainerBuilder = createContainerObjectSpecBuilder(assetContainer.logicalPath)
@@ -45,8 +48,9 @@ class CodeGenerator(
         builder.tag(nameAllocator)
         builder.tag(path)
 
-        if (path.isDirectory()) {
-            Files.list(path).filter { it.isDirectory() }.forEach { subPath ->
+        if (path.fromResources().isDirectory()) {
+            Files.list(path.fromResources()).filter { it.isDirectory() }.forEach { child ->
+                val subPath = path.resolve(child.name)
                 val spec = createContainerObjectSpecBuilder(subPath)
                 builder.addType(spec.build())
             }
@@ -189,3 +193,4 @@ class CodeGenerator(
         return pathNames + assetName
     }
 }
+

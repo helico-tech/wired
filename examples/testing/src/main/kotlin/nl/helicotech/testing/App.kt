@@ -6,21 +6,17 @@ import io.ktor.server.html.*
 import io.ktor.server.netty.*
 import io.ktor.server.routing.*
 import kotlinx.html.*
-import nl.helicotech.testing.assets.Assets
-import nl.helicotech.testing.assets.importMap
-import nl.helicotech.testing.assets.module
-import nl.helicotech.testing.assets.staticAssets
 
 fun main() {
-    embeddedServer(
+    /*embeddedServer(
         factory = Netty,
         port = 8080,
         host = "0.0.0.0",
         module = Application::testing,
-    ).start(wait = true)
+    ).start(wait = true)*/
 }
 
-fun Application.testing() {
+/*fun Application.testing() {
     routing {
         staticAssets(Assets)
 
@@ -36,4 +32,4 @@ fun Application.testing() {
             }
         }
     }
-}
+}*/

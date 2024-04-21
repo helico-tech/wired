@@ -9,6 +9,7 @@ abstract class AbstractDependencyResolver(
 ) : DependencyResolver {
 
     override fun resolve(asset: Asset): Set<Dependency> {
+        return setOf()
         val sourceHandler = sourceHandlerFactory.create(asset.absoluteLogicalPath.readLines())
 
         val imports = sourceHandler.getSourceDependencies()
