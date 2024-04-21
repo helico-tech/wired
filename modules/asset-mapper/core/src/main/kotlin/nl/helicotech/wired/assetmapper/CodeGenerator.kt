@@ -1,42 +1,71 @@
 package nl.helicotech.wired.assetmapper
 
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import nl.helicotech.wired.assetmapper.js.JavascriptDependencyResolver
+import java.nio.file.Files
 import java.nio.file.Path
+import java.util.*
+import kotlin.io.path.isDirectory
 import kotlin.io.path.name
+import kotlin.io.path.nameWithoutExtension
 
 class CodeGenerator(
     private val assetContainer: AssetContainer,
     private val packageName: String,
     private val fileName: String
 ) {
-    private val nameAllocator = NameAllocator()
+    private val nameAllocators = mutableMapOf<Path, NameAllocator>()
 
     private val dependencyResolver = RootDependencyResolver(JavascriptDependencyResolver).create(assetContainer)
 
     fun generate(): FileSpec {
         val builder = FileSpec.builder(packageName, fileName)
 
-        val rootObjectBuilder = generateDirectoryObjectTree()
+        val assetContainerBuilder = createContainerObjectSpecBuilder(assetContainer.logicalPath)
+            .implementAssetContainer(assetContainer)
+
+        builder.addType(assetContainerBuilder.build())
 
         return builder.build()
     }
 
-    private fun generateDirectoryObjectTree(): TypeSpec.Builder {
-        val allDirectories = assetContainer.assets
-            .fold(setOf<Path>()) { acc, asset -> acc + asset.parentDirectories() }
-            .sortedBy { it.toString() }
+    private fun createContainerObjectSpecBuilder(path: Path): TypeSpec.Builder {
 
-        val builder = TypeSpec.objectBuilder(nameAllocator.newName(assetContainer.logicalPath.name, assetContainer))
+        val nameAllocator = nameAllocators.computeIfAbsent(path) {
+            when {
+                path.parent != null && nameAllocators.containsKey(path.parent) -> nameAllocators[path.parent]!!.copy()
+                else -> NameAllocator()
+            }
+        }
+
+        val name = nameAllocator.newName(path.name.camelCase(), path)
+
+        val builder = TypeSpec.objectBuilder(name)
+        builder.tag(nameAllocator)
+        builder.tag(path)
+
+        if (path.isDirectory()) {
+            Files.list(path).filter { it.isDirectory() }.forEach { subPath ->
+                val spec = createContainerObjectSpecBuilder(subPath)
+                builder.addType(spec.build())
+            }
+        }
+
+        val assets = getAssetsForPath(path)
+
+        builder.addAssets(assets)
 
         return builder
     }
 
-    private fun generateDirectory(directory: Path, directories: List<Path>, nameAllocator: NameAllocator) {
-
+    private fun getAssetsForPath(path: Path): List<Asset> {
+        return assetContainer.assets.filter { asset ->
+            asset.absoluteLogicalPath.normalize().parent == path.normalize()
+        }
     }
 
-    /*private fun TypeSpec.Builder.addAsset(asset: Asset, dependencies: List<Dependency>) = addProperty(asset(asset, dependencies))
+    private fun TypeSpec.Builder.addAsset(asset: Asset, dependencies: List<Dependency>) = addProperty(asset(asset, dependencies))
 
     private fun TypeSpec.Builder.addAssets(assets: List<Asset>) {
         val assetsWithDependencies = assets.map { asset ->
@@ -49,20 +78,55 @@ class CodeGenerator(
         }
     }
 
-    private fun assetContainer(container: AssetContainer): TypeSpec {
-        val builder = TypeSpec.objectBuilder(containerName(container))
+    private fun asset(asset: Asset, dependencies: List<Dependency>): PropertySpec {
+        val builder = PropertySpec.builder(
+            name = assetName(asset),
+            type = asset::class.asTypeName(),
+        )
 
-        builder.implementAssetContainer(container)
+        val dependencyPaths = dependencies.map {
+            CodeBlock.of("%T.of(%S)", Path::class, it.logicalPath.normalize())
+        }.joinToCode(", ")
+
+        when (asset) {
+            is Asset.JavaScript -> {
+                builder.initializer(
+                    "%T(%S, %T.of(%S), %S, %N, listOf(%L))",
+                    Asset.JavaScript::class,
+                    asset.module ?: "",
+                    Path::class,
+                    asset.logicalPath,
+                    asset.digest,
+                    nameAllocators[asset.container.logicalPath]!![asset.container.logicalPath],
+                    dependencyPaths
+                )
+            }
+
+            else -> {
+                builder.initializer(
+                    "%T(%T.of(%S), %S, %N, listOf(%L))",
+                    asset::class,
+                    Path::class,
+                    asset.logicalPath,
+                    asset.digest,
+                    AssetContainer::class,
+                    asset.container.logicalPath,
+                    dependencyPaths
+                )
+            }
+        }
 
         return builder.build()
     }
 
-    private fun TypeSpec.Builder.implementAssetContainer(container: AssetContainer): TypeSpec.Builder {
-        val allDirectories = assetContainer.assets
-            .fold(setOf<Path>(Path.of("."))) { acc, asset -> acc + asset.parentDirectories() }
-            .sortedBy { it.toString() }
+    private fun assetName(asset: Asset): String {
+        val nameAllocator = nameAllocators[asset.absoluteLogicalPath.parent]!!
+        return nameAllocator.newName(asset.logicalPath.nameWithoutExtension.camelCase(), asset)
+    }
 
-        val localAssets = container.assets.filterAtPath(container.logicalPath)
+    private fun String.camelCase(): String = replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+
+    private fun TypeSpec.Builder.implementAssetContainer(container: AssetContainer): TypeSpec.Builder {
 
         addSuperinterface(AssetContainer::class)
 
@@ -87,7 +151,7 @@ class CodeGenerator(
             .build()
         )
 
-        addAssets(localAssets)
+        val assetObjectPaths = container.assets.map { getAssetObjectPath(it).joinToString(".") }
 
         addProperty(
             propertySpec = PropertySpec.builder(
@@ -98,7 +162,7 @@ class CodeGenerator(
             .initializer(
                 CodeBlock.builder()
                     .add("listOf(")
-                    .add(container.assets.joinToString(", ") { nameAllocator[it] })
+                    .add(assetObjectPaths.joinToString(", "))
                     .add(")")
                     .build()
             )
@@ -108,72 +172,20 @@ class CodeGenerator(
         return this
     }
 
-    private fun List<Asset>.filterAtPath(path: Path) = filter { asset ->
-        asset.absoluteLogicalPath.normalize().parent == path.normalize()
-    }
+    private fun getAssetObjectPath(asset: Asset): List<String> {
+        val assetName = nameAllocators[asset.absoluteLogicalPath.parent]!![asset]
 
-    private fun containerName(container: AssetContainer): String {
-        return nameAllocator.newName(container.logicalPath.name.camelCase(), container)
-    }
+        var currentPath = asset.absoluteLogicalPath.parent
+        val paths = mutableListOf<Path>()
 
-    private fun asset(asset: Asset, dependencies: List<Dependency>): PropertySpec {
-        val builder = PropertySpec.builder(
-            name = assetName(asset),
-            type = asset::class.asTypeName(),
-        )
-
-        val dependencyPaths = dependencies.map {
-            CodeBlock.of("%T.of(%S)", Path::class, it.logicalPath.normalize())
-        }.joinToCode(", ")
-
-        when (asset) {
-            is Asset.JavaScript -> {
-                builder.initializer(
-                    "%T(%S, %T.of(%S), %S, %N, listOf(%L))",
-                    Asset.JavaScript::class,
-                    asset.module ?: "",
-                    Path::class,
-                    asset.logicalPath,
-                    asset.digest,
-                    nameAllocator[asset.container],
-                    dependencyPaths
-                )
-            }
-
-            else -> {
-                builder.initializer(
-                    "%T(%T.of(%S), %S, %N, listOf(%L))",
-                    asset::class,
-                    Path::class,
-                    asset.logicalPath,
-                    asset.digest,
-                    AssetContainer::class,
-                    asset.container.logicalPath,
-                    dependencyPaths
-                )
-            }
+        while (currentPath != asset.container.logicalPath) {
+            paths.add(currentPath)
+            currentPath = currentPath.parent
         }
 
-        return builder.build()
-    }
+        paths.reverse()
 
-    private fun assetName(asset: Asset): String {
-        return nameAllocator.newName(asset.logicalPath.nameWithoutExtension.camelCase(), asset)
-    }
-
-    private fun directoryName(path: Path): String {
-        return nameAllocator.newName(path.name.camelCase(), path)
-    }
-
-    private fun String.camelCase(): String = replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }*/
-
-    private fun Asset.parentDirectories(): Set<Path> {
-        val parentDirectories = mutableSetOf<Path>()
-        var parent = logicalPath.normalize().parent
-        while (parent != null) {
-            parentDirectories.add(parent)
-            parent = parent.parent
-        }
-        return parentDirectories
+        val pathNames = paths.map { nameAllocators[it]!![it] }
+        return pathNames + assetName
     }
 }
