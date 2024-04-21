@@ -10,7 +10,7 @@ import kotlin.io.path.Path
 class JavascriptDependencyResolverSpec : DescribeSpec({
     describe("JavascriptDependencyResolver") {
 
-        val container = mutableAssetContainer("src/test/resources/dependency-resolver")
+        val container = mutableAssetContainer("/dependency-resolver")
 
         container.addJavaScriptAsset(Path("app.js"), "123", null)
         container.addJavaScriptAsset(Path("duck.js"), "123", null)

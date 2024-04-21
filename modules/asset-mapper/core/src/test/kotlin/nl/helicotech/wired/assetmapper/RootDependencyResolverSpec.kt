@@ -10,7 +10,7 @@ import java.nio.file.Path
 class RootDependencyResolverSpec : DescribeSpec({
     describe("RootDependencyResolver") {
 
-        val container = mutableAssetContainer("src/test/resources/dependency-resolver")
+        val container = mutableAssetContainer("/dependency-resolver")
 
         container.addJavaScriptAsset(Path.of("transient-1.js"), "123", null)
         container.addJavaScriptAsset(Path.of("transient-2.js"), "123", null)

@@ -10,12 +10,12 @@ class AssetContainerSpec : DescribeSpec({
     describe("MutableAssetContainer") {
 
         it("should be able to be created") {
-            val container = mutableAssetContainer("root")
-            container.logicalPath shouldBe Path.of("root")
+            val container = mutableAssetContainer("/root")
+            container.logicalPath shouldBe Path.of("/root")
         }
 
         describe("when created") {
-            val container = mutableAssetContainer("root")
+            val container = mutableAssetContainer("/root")
 
             it("should have an empty list of assets") {
                 container.assets.size shouldBe 0
