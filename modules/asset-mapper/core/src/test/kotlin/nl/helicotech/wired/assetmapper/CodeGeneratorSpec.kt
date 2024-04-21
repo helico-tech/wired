@@ -3,6 +3,7 @@ package nl.helicotech.wired.assetmapper
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.resource.resourceAsString
 import io.kotest.matchers.shouldBe
+import nl.helicotech.wired.assetmapper.codegen.ObjectTree
 import java.nio.file.Path
 import kotlin.io.path.Path
 
@@ -44,7 +45,7 @@ class CodeGeneratorSpec : DescribeSpec({
         it("should add the dependencies to the assets") {
             val container = mutableAssetContainer("src/test/resources/dependency-resolver")
 
-            container.addJavaScriptAsset(Path("app.js"), "123", null)
+            /*container.addJavaScriptAsset(Path("app.js"), "123", null)
             container.addJavaScriptAsset(Path("duck.js"), "123", null)
 
             container.addJavaScriptAsset(Path("subdirectory/cow.js"), "123", null)
@@ -54,7 +55,10 @@ class CodeGeneratorSpec : DescribeSpec({
             val fileSpec = codeGenerator.generate()
 
             val result = fileSpec.toString()
-            println(result)
+            println(result)*/
+
+            val objectTree = ObjectTree(container)
+            objectTree.generate()
         }
     }
 })

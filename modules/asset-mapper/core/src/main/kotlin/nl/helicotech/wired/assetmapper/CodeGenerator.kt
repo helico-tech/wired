@@ -1,12 +1,9 @@
 package nl.helicotech.wired.assetmapper
 
 import com.squareup.kotlinpoet.*
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import nl.helicotech.wired.assetmapper.js.JavascriptDependencyResolver
 import java.nio.file.Path
-import java.util.*
 import kotlin.io.path.name
-import kotlin.io.path.nameWithoutExtension
 
 class CodeGenerator(
     private val assetContainer: AssetContainer,
@@ -14,14 +11,32 @@ class CodeGenerator(
     private val fileName: String
 ) {
     private val nameAllocator = NameAllocator()
+
     private val dependencyResolver = RootDependencyResolver(JavascriptDependencyResolver).create(assetContainer)
 
-    fun generate(): FileSpec = FileSpec.builder(packageName, fileName)
-        .addAssetContainer()
-        .build()
+    fun generate(): FileSpec {
+        val builder = FileSpec.builder(packageName, fileName)
 
-    private fun FileSpec.Builder.addAssetContainer() = addType(assetContainer(assetContainer))
-    private fun TypeSpec.Builder.addAsset(asset: Asset, dependencies: List<Dependency>) = addProperty(asset(asset, dependencies))
+        val rootObjectBuilder = generateDirectoryObjectTree()
+
+        return builder.build()
+    }
+
+    private fun generateDirectoryObjectTree(): TypeSpec.Builder {
+        val allDirectories = assetContainer.assets
+            .fold(setOf<Path>()) { acc, asset -> acc + asset.parentDirectories() }
+            .sortedBy { it.toString() }
+
+        val builder = TypeSpec.objectBuilder(nameAllocator.newName(assetContainer.logicalPath.name, assetContainer))
+
+        return builder
+    }
+
+    private fun generateDirectory(directory: Path, directories: List<Path>, nameAllocator: NameAllocator) {
+
+    }
+
+    /*private fun TypeSpec.Builder.addAsset(asset: Asset, dependencies: List<Dependency>) = addProperty(asset(asset, dependencies))
 
     private fun TypeSpec.Builder.addAssets(assets: List<Asset>) {
         val assetsWithDependencies = assets.map { asset ->
@@ -150,7 +165,7 @@ class CodeGenerator(
         return nameAllocator.newName(path.name.camelCase(), path)
     }
 
-    private fun String.camelCase(): String = replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+    private fun String.camelCase(): String = replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }*/
 
     private fun Asset.parentDirectories(): Set<Path> {
         val parentDirectories = mutableSetOf<Path>()
